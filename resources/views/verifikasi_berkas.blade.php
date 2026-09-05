@@ -1235,11 +1235,15 @@
     // Ambil data dokumen ASLI milik siswa ini dari server (bukan localStorage,
     // biar nggak ketimpa/nyampur sama data siswa lain)
     let dokumenServer = {};
+    let isPenerimaBantuan = false;
+    let tampilkanBuktiTransfer = false;
     try {
         const res = await fetch(`/verifikasi_berkas/${id}/detail`);
         if (!res.ok) throw new Error('Gagal ambil detail berkas: ' + res.status);
         const json = await res.json();
         dokumenServer = json.dokumen || {};
+        isPenerimaBantuan = json.is_penerima_bantuan || false;
+        tampilkanBuktiTransfer = json.tampilkan_bukti_transfer || false;
     } catch (err) {
         console.error('Gagal memuat berkas siswa:', err);
         docGrid.innerHTML = "<p style='font-size:12.5px;color:#b91c1c;'>Gagal memuat berkas dari server. Coba tutup dan buka lagi.</p>";
@@ -1255,7 +1259,7 @@
 
     docGrid.innerHTML = "";
 
-    const masterDocs = [
+    let masterDocs = [
       { key: "foto", serverKey: "pas_foto", title: "Pas Foto Formal 3x4", icon: "fa-image" },
       { key: "kk", serverKey: "kk", title: "Kartu Keluarga (KK)", icon: "fa-file-lines" },
       { key: "akta", serverKey: "akta", title: "Akta Kelahiran", icon: "fa-file-lines" },
@@ -1265,6 +1269,15 @@
       { key: "kip", serverKey: "kip", title: "KIP / KKS / PKH", icon: "fa-credit-card" },
       { key: "bayar", serverKey: "bukti_pembayaran", title: "Bukti Transfer Pembayaran", icon: "fa-file-invoice" }
     ];
+
+    // Kartu KIP/KKS/PKH dan Bukti Transfer cuma ditampilkan kalau memang relevan
+    // buat siswa ini, biar nggak nahan status "Lengkap" gara-gara dokumen yang
+    // emang nggak wajib buat dia.
+    masterDocs = masterDocs.filter(doc => {
+      if (doc.key === 'kip') return isPenerimaBantuan;
+      if (doc.key === 'bayar') return tampilkanBuktiTransfer;
+      return true;
+    });
 
     masterDocs.forEach(doc => {
       const info = dokumenServer[doc.serverKey] || { sudah_upload: false, url: null, dicentang_admin: false };

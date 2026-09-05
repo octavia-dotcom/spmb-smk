@@ -76,9 +76,6 @@ Route::get('/cetak_kartu', function (){
 Route::get('/edit_data_siswa', function (){
     return view('edit_data_siswa');
 });
-Route::get('/berkas_pendaftaran', function (){
-    return view('berkas_pendaftaran');
-});
 Route::get('/list_pendaftar', function (){
     return view('list_pendaftar');
 });
@@ -137,6 +134,7 @@ Route::get('/pengumuman_siswa', [SiswaController::class, 'pengumumanSiswa'])->na
 Route::middleware(['auth'])->group(function () {
     Route::get('/edit_data_siswa', [PendaftarController::class, 'edit'])->name('pendaftar.edit');
     Route::put('/edit_data_siswa/update', [PendaftarController::class, 'update'])->name('pendaftar.update');
+    Route::post('/berkas_pendaftaran/ganti-dokumen', [DokumenController::class, 'updateSatuBerkas']);
 });
 // Route khusus Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {

@@ -660,7 +660,7 @@
                         <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
                         <div>
                             <div class="stat-label">Status Pendaftaran</div>
-                            <div class="stat-value"><span class="badge" id="val_status">{{ $pendaftar->status ?? 'Aktif' }}</span></div>
+                            <div class="stat-value"><span class="badge" id="val_status">{{ $pendaftar->status_pendaftaran ?? 'Aktif' }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -686,7 +686,7 @@
                             <div class="field"><span class="field-label">Jumlah Saudara</span><span class="field-sep">:</span><span class="field-val" id="val_saudara">{{ $pendaftar->jumlah_saudara_kandung ?? '-' }}</span></div>
                             <div class="field"><span class="field-label">Agama</span><span class="field-sep">:</span><span class="field-val" id="val_agama">{{ $pendaftar->agama ?? '-' }}</span></div>
                             <div class="field"><span class="field-label">Kebutuhan Khusus</span><span class="field-sep">:</span><span class="field-val" id="val_kebutuhanKhusus">{{ $pendaftar->kebutuhan_khusus ?? '-' }}</span></div>
-                            <div class="field"><span class="field-label">Penerima KPS/KKS/KIP</span><span class="field-sep">:</span><span class="field-val" id="val_kpsKip">{{ $pendaftar->is_penerima_bantuan ?? '-' }}</span></div>
+                            <div class="field"><span class="field-label">Penerima KPS/KKS/KIP</span><span class="field-sep">:</span><span class="field-val" id="val_kpsKip">{{ $pendaftar->dokumen->is_penerima_bantuan ?? '-' }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -760,11 +760,11 @@
                             <div class="field"><span class="field-label">Kode Pos</span><span class="field-sep">:</span><span class="field-val" id="val_kodePos">{{ $pendaftar->kode_pos ?? '-' }}</span></div>
                         </div>
                         <div class="field-list">
-                            <div class="field"><span class="field-label">Alamat Lengkap</span><span class="field-sep">:</span><span class="field-val" id="val_alamatLengkap">{{ $pendaftar->alamat ?? '-' }}</span></div>
+                            <div class="field"><span class="field-label">Alamat Lengkap</span><span class="field-sep">:</span><span class="field-val" id="val_alamatLengkap">{{ $pendaftar->alamat_lengkap ?? '-' }}</span></div>
                             <div class="field"><span class="field-label">RT / RW</span><span class="field-sep">:</span><span class="field-val" id="val_rtRw">{{ $pendaftar->rt ?? '-' }} / {{ $pendaftar->rw ?? '-' }}</span></div>
                             <div class="field"><span class="field-label">Jenis Tinggal</span><span class="field-sep">:</span><span class="field-val" id="val_jenisTinggal">{{ $pendaftar->jenis_tinggal ?? '-' }}</span></div>
-                            <div class="field"><span class="field-label">Alat Transportasi</span><span class="field-sep">:</span><span class="field-val" id="val_transportasi">{{ $pendaftar->transportasi ?? '-' }}</span></div>
-                            <div class="field"><span class="field-label">Jarak ke Sekolah</span><span class="field-sep">:</span><span class="field-val" id="val_jarakSekolah">{{ $pendaftar->jarak_sekolah ?? '-' }}</span></div>
+                            <div class="field"><span class="field-label">Alat Transportasi</span><span class="field-sep">:</span><span class="field-val" id="val_transportasi">{{ $pendaftar->alat_transportasi_ke_sekolah ?? '-' }}</span></div>
+                            <div class="field"><span class="field-label">Jarak ke Sekolah</span><span class="field-sep">:</span><span class="field-val" id="val_jarakSekolah">{{ $pendaftar->jarak_ke_sekolah ?? '-' }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -796,7 +796,13 @@
                         </div>
                     </div>
                     <div style="margin-top: 15px;" class="field-list">
-                        <div class="field"><span class="field-label">Gelombang</span><span class="field-sep">:</span><span class="field-val" id="val_gelombangDetail">{{ $pendaftar->gelombang_detail ?? 'Gelombang 1 (Januari - Maret 2026)' }}</span></div>
+                        @php
+                            $labelGelombang = [
+                                'Gelombang 1' => 'Gelombang 1 (Januari - Maret 2026)',
+                                'Gelombang 2' => 'Gelombang 2 (April - Juli 2026)',
+                            ];
+                        @endphp
+                        <div class="field"><span class="field-label">Gelombang</span><span class="field-sep">:</span><span class="field-val" id="val_gelombangDetail">{{ $labelGelombang[$pendaftar->gelombang] ?? ($pendaftar->gelombang ?? '-') }}</span></div>
                         <div class="field"><span class="field-label">Metode Pembayaran</span><span class="field-sep">:</span><span class="field-val" id="val_metodePembayaran">{{ $pendaftar->metode_pembayaran ?? 'Gratis / Bebas Biaya' }}</span></div>
                     </div>
                 </div>

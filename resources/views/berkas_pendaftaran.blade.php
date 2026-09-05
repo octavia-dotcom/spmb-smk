@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Berkas Pendaftaran - PPDB SMK Maarif Walisongo</title>
 <link rel="icon" type="image/png" href="{{ asset('img/logo.smk.png') }}">
     <link rel="icon" type="image/png" href="{{ asset('img/logo.smk.png') }}">
@@ -736,6 +737,13 @@
     <script>
         let berkasList = [];
 
+        // Data asli dari server: status per-dokumen (sudah dicocokkan dengan aksi admin di halaman Verifikasi Berkas)
+        const serverDokumenView = @json($berkasPendaftaran);
+        const serverCatatanRevisi = @json($catatanRevisi);
+        const serverTanggalUpload = @json($tanggalUploadDokumen);
+        const isPenerimaBantuan = @json(($pendaftar->dokumen->is_penerima_bantuan ?? 'Tidak') === 'Ya');
+        const tampilkanBuktiTransfer = @json($tampilkanBuktiTransfer);
+
         function getDynamicBerkasList() {
             const list = [
                 { key: "kk", nama: "Fotokopi Kartu Keluarga (KK)", keterangan: "Kartu Keluarga", status: "belum", tanggal: "-", icon: "fa-file-lines" },
@@ -746,42 +754,11 @@
                 { key: "skl", nama: "Surat Keterangan Lulus (SKL) / Ijazah", keterangan: "SKL / Ijazah SMP/MTs", status: "belum", tanggal: "-", icon: "fa-file-lines" }
             ];
 
-            const localData = localStorage.getItem("dataSiswaSPMB") || localStorage.getItem("list_pendaftar");
-            let isKip = false;
-            let isGel2 = false;
-
-            const statusKpsStorage = localStorage.getItem('penerima_kps_status');
-            if (statusKpsStorage && (statusKpsStorage.toLowerCase() === 'ya' || statusKpsStorage === 'true')) {
-                isKip = true;
-            }
-
-            const gelombangStorage = localStorage.getItem('gelombang_pendaftaran');
-            if (gelombangStorage && gelombangStorage.includes('2')) {
-                isGel2 = true;
-            }
-
-            if (localData) {
-                try {
-                    const parsed = JSON.parse(localData);
-                    const dataSiswa = Array.isArray(parsed) ? (parsed[0] || {}) : parsed;
-                    
-                    const kpsVal = String(dataSiswa.kpsKip || dataSiswa.kps || "").toLowerCase();
-                    if (kpsVal.includes("ya") || kpsVal.includes("kip") || kpsVal.includes("kks") || kpsVal.includes("pkh") || kpsVal.includes("true")) {
-                        isKip = true;
-                    }
-
-                    const gelVal = String(dataSiswa.gelombang || "").toLowerCase();
-                    if (gelVal.includes("2")) {
-                        isGel2 = true;
-                    }
-                } catch (e) {}
-            }
-
-            if (isKip) {
+            if (isPenerimaBantuan) {
                 list.push({ key: "kps", nama: "Penerima KIP / KKS / PKH", keterangan: "Dokumen/Foto Kartu KIP/KKS/PKH", status: "belum", tanggal: "-", icon: "fa-credit-card" });
             }
 
-            if (isGel2) {
+            if (tampilkanBuktiTransfer) {
                 list.push({ key: "pembayaran", nama: "Bukti Transfer Pembayaran", keterangan: "Bukti Bayar Pendaftaran Gelombang 2", status: "belum", tanggal: "-", icon: "fa-file-invoice" });
             }
 
@@ -795,49 +772,18 @@
             berkasList = getDynamicBerkasList();
 
             // CATATAN: Nama & NISN siswa sudah ditampilkan langsung dari server
-            // ({{ $pendaftar->nama_lengkap }} / {{ $pendaftar->nisn }}) di HTML,
-            // jadi tidak lagi ditimpa oleh data localStorage siswa lain.
-
-            let currentBerkas = {};
-            try {
-                const rawBerkas = localStorage.getItem("berkas_pendaftar_current");
-                currentBerkas = (rawBerkas && rawBerkas !== "undefined") ? JSON.parse(rawBerkas) : {};
-            } catch (e) {
-                currentBerkas = {};
-            }
-
-            const statusDokumenMap = currentBerkas.statusDokumen || {};
+            // ({{ $pendaftar->nama_lengkap }} / {{ $pendaftar->nisn }}) di HTML.
+            // Status & file dokumen di bawah ini juga sudah dari server (serverDokumenView),
+            // hasil sinkron langsung dengan aksi admin di halaman Verifikasi Berkas —
+            // BUKAN lagi dari localStorage (yang sebelumnya sama untuk semua siswa).
 
             berkasList.forEach(item => {
-                let targetKey = item.key;
-                if (item.key === 'kps') targetKey = 'kip';
-                if (item.key === 'pembayaran') targetKey = 'bayar';
+                const info = serverDokumenView[item.key] || { url: null, status: 'belum' };
 
-                const savedData = currentBerkas[targetKey] || currentBerkas[item.key] || localStorage.getItem('file_' + item.key);
-                
-                if (savedData) {
-                    try {
-                        const parsed = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
-                        item.fileData = parsed.fileData || parsed;
-                        item.fileName = parsed.fileName || parsed.namaFile || "Dokumen";
-                        
-                        if (statusDokumenMap[targetKey]) {
-                            item.status = statusDokumenMap[targetKey];
-                        } else if (parsed.status) {
-                            item.status = parsed.status;
-                        } else {
-                            item.status = 'menunggu';
-                        }
-
-                        item.tanggal = parsed.tanggal || "Baru saja";
-                    } catch (e) {
-                        item.fileData = savedData;
-                        item.status = statusDokumenMap[targetKey] || 'menunggu';
-                        item.tanggal = "Baru saja";
-                    }
-                } else {
-                    item.status = statusDokumenMap[targetKey] || 'belum';
-                }
+                item.fileData = info.url || null;
+                item.fileName = info.url ? "Dokumen Tersimpan" : null;
+                item.status = info.status;
+                item.tanggal = info.url ? (serverTanggalUpload || '-') : '-';
             });
         }
 
@@ -845,15 +791,7 @@
             const tbody = document.getElementById('berkasTableBody');
             tbody.innerHTML = '';
 
-            let currentBerkas = {};
-            try {
-                const rawBerkas = localStorage.getItem("berkas_pendaftar_current");
-                currentBerkas = (rawBerkas && rawBerkas !== "undefined") ? JSON.parse(rawBerkas) : {};
-            } catch(e) {
-                currentBerkas = {};
-            }
-
-            const catatanRevisi = currentBerkas._catatanRevisi || "Mohon periksa kembali berkas/dokumen Anda yang ditandai revisi.";
+            const catatanRevisi = serverCatatanRevisi || "Mohon periksa kembali berkas/dokumen Anda yang ditandai revisi.";
 
             const hasAnyRevisi = berkasList.some(item => item.status === 'revisi');
             const revisionAlert = document.getElementById('revisionAlertBox');
@@ -934,42 +872,16 @@
             if (e.target.files.length > 0 && selectedRowIndex !== null) {
                 const file = e.target.files[0];
                 const fileName = file.name;
-                
+
                 const reader = new FileReader();
                 reader.onload = function(evt) {
-                    const now = new Date();
-                    const tglStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + " " + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
-
                     const item = berkasList[selectedRowIndex];
+                    // Ini cuma PREVIEW lokal (belum tersimpan ke server).
+                    // File asli disimpan di item.pendingFile, dikirim ke server pas tombol "Simpan" diklik.
                     item.fileData = evt.target.result;
                     item.fileName = fileName;
-                    item.status = 'menunggu';
-                    item.tanggal = tglStr;
+                    item.pendingFile = file;
                     item.isChanged = true;
-
-                    let currentBerkas = {};
-                    try {
-                        const rawBerkas = localStorage.getItem("berkas_pendaftar_current");
-                        currentBerkas = (rawBerkas && rawBerkas !== "undefined") ? JSON.parse(rawBerkas) : {};
-                    } catch(e) { currentBerkas = {}; }
-
-                    let targetKey = item.key;
-                    if (item.key === 'kps') targetKey = 'kip';
-                    if (item.key === 'pembayaran') targetKey = 'bayar';
-
-                    if (!currentBerkas.statusDokumen) currentBerkas.statusDokumen = {};
-                    currentBerkas.statusDokumen[targetKey] = 'menunggu';
-
-                    currentBerkas[targetKey] = {
-                        fileName: fileName,
-                        namaFile: fileName,
-                        fileData: evt.target.result,
-                        status: 'menunggu',
-                        tanggal: tglStr
-                    };
-
-                    localStorage.setItem("berkas_pendaftar_current", JSON.stringify(currentBerkas));
-                    localStorage.setItem('file_' + item.key, JSON.stringify(currentBerkas[targetKey]));
 
                     hasChanges = true;
                     document.getElementById('btnSimpan').disabled = false;
@@ -990,7 +902,7 @@
             modalTitle.innerText = "Lihat " + item.nama;
 
             if (item.fileData) {
-                if (item.fileData.startsWith('data:application/pdf')) {
+                if (/\.pdf($|\?)/i.test(item.fileData) || item.fileData.startsWith('data:application/pdf')) {
                     modalBody.innerHTML = `<embed src="${item.fileData}" type="application/pdf" width="100%" height="350px" />`;
                 } else {
                     modalBody.innerHTML = `<img src="${item.fileData}" alt="${item.nama}" class="preview-img">`;
@@ -1025,15 +937,64 @@
             document.getElementById('previewModal').classList.remove('show');
         }
 
-        document.getElementById('btnSimpan').addEventListener('click', function() {
+        // JS key (dipakai di berkasList) -> nama kolom di server (harus sama dengan DokumenController)
+        const JS_KEY_TO_SERVER_KOLOM = {
+            'kk': 'kk',
+            'akta': 'akta',
+            'ktp-ayah': 'ktp_ayah',
+            'ktp-ibu': 'ktp_ibu',
+            'foto': 'pas_foto',
+            'skl': 'skl',
+            'kps': 'kip',
+            'pembayaran': 'bukti_pembayaran'
+        };
+
+        document.getElementById('btnSimpan').addEventListener('click', async function() {
             if (!hasChanges) return;
-            berkasList.forEach(item => item.isChanged = false);
-            hasChanges = false;
-            
-            document.getElementById('btnSimpan').disabled = true;
-            document.getElementById('unsavedAlert').style.display = 'none';
-            alert('Perubahan berkas berhasil disimpan!');
-            renderTable();
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const itemsToUpload = berkasList.filter(item => item.pendingFile);
+
+            if (itemsToUpload.length === 0) {
+                hasChanges = false;
+                document.getElementById('btnSimpan').disabled = true;
+                document.getElementById('unsavedAlert').style.display = 'none';
+                return;
+            }
+
+            const btnSimpan = this;
+            btnSimpan.disabled = true;
+            btnSimpan.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                for (const item of itemsToUpload) {
+                    const kolomServer = JS_KEY_TO_SERVER_KOLOM[item.key];
+                    const formData = new FormData();
+                    formData.append('jenis_dokumen', kolomServer);
+                    formData.append('file', item.pendingFile);
+
+                    const res = await fetch('/berkas_pendaftaran/ganti-dokumen', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                        body: formData
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.message || `Gagal menyimpan ${item.nama}`);
+                    }
+                }
+
+                alert('Perubahan berkas berhasil disimpan!');
+                // Muat ulang halaman biar semua data (status, tanggal, dll) sinkron 100% dengan server
+                window.location.reload();
+
+            } catch (err) {
+                console.error(err);
+                alert('Gagal menyimpan sebagian/semua berkas: ' + err.message + '\nCoba lagi.');
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan';
+            }
         });
 
         function toggleSidebar() {

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Edit Biodata Siswa — SMK Ma'arif Walisongo Kajoran</title>
 <link rel="icon" type="image/png" href="{{ asset('img/logo.smk.png') }}">
 <link rel="icon" type="image/png" href="{{ asset('img/logo.smk.png') }}">
@@ -739,66 +740,68 @@
         </div>
 
         <div class="row-2">
-          <div class="field"><label>Nama Lengkap Calon Siswa<span class="req">*</span></label><input type="text" id="input_nama" class="req"></div>
-          <div class="field"><label>Asal Sekolah<span class="req">*</span></label><input type="text" id="input_asalSekolah" class="req"></div>
+          <div class="field"><label>Nama Lengkap Calon Siswa<span class="req">*</span></label><input type="text" id="input_nama" class="req" value="{{ $pendaftar->nama_lengkap ?? '' }}"></div>
+          <div class="field"><label>Asal Sekolah<span class="req">*</span></label><input type="text" id="input_asalSekolah" class="req" value="{{ $pendaftar->asal_sekolah ?? '' }}"></div>
         </div>
 
         <div class="row-2">
-          <div class="field"><label>NISN<span class="req">*</span></label><input type="number" id="input_nisn" class="req"></div>
-          <div class="field"><label>Nomor Hp Siswa (aktif)<span class="req">*</span></label><input type="number" id="input_hp" class="req"></div>
+          <div class="field"><label>NISN<span class="req">*</span></label><input type="number" id="input_nisn" class="req" value="{{ $pendaftar->nisn ?? '' }}"></div>
+          <div class="field"><label>Nomor Hp Siswa (aktif)<span class="req">*</span></label><input type="number" id="input_hp" class="req" value="{{ $pendaftar->no_hp ?? '' }}"></div>
         </div>
 
         <div class="row-2">
-          <div class="field"><label>Tempat Lahir<span class="req">*</span></label><input type="text" id="input_tempatLahir" class="req"></div>
+          <div class="field"><label>Tempat Lahir<span class="req">*</span></label><input type="text" id="input_tempatLahir" class="req" value="{{ $pendaftar->tempat_lahir ?? '' }}"></div>
           <div class="field">
             <label>Ukuran Fisik (Tinggi & Berat)<span class="req">*</span></label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <input type="number" id="input_tinggi" class="req" placeholder="Tinggi (cm)">
-              <input type="number" id="input_berat" class="req" placeholder="Berat (kg)">
+              <input type="number" id="input_tinggi" class="req" placeholder="Tinggi (cm)" value="{{ $pendaftar->tinggi_badan ?? '' }}">
+              <input type="number" id="input_berat" class="req" placeholder="Berat (kg)" value="{{ $pendaftar->berat_badan ?? '' }}">
             </div>
           </div>
         </div>
 
         <div class="row-2">
-          <div class="field"><label>Tanggal Lahir<span class="req">*</span></label><input type="date" id="input_tglLahir" class="req"></div>
-          <div class="field"><label>Jumlah Saudara<span class="req">*</span></label><input type="number" id="input_jumlahSaudara" class="req"></div>
+          <div class="field"><label>Tanggal Lahir<span class="req">*</span></label><input type="date" id="input_tglLahir" class="req" value="{{ $pendaftar->tanggal_lahir ? \Carbon\Carbon::parse($pendaftar->tanggal_lahir)->format('Y-m-d') : '' }}"></div>
+          <div class="field"><label>Jumlah Saudara<span class="req">*</span></label><input type="number" id="input_jumlahSaudara" class="req" value="{{ $pendaftar->jumlah_saudara_kandung ?? '' }}"></div>
         </div>
 
         <div class="row-2">
           <div class="field">
             <label>Jenis Kelamin<span class="req">*</span></label>
             <div class="radio-group">
-              <label class="radio-option"><input type="radio" name="jenis_kelamin" value="L"> Laki-laki</label>
-              <label class="radio-option"><input type="radio" name="jenis_kelamin" value="P"> Perempuan</label>
+              <label class="radio-option"><input type="radio" name="jenis_kelamin" value="L" {{ ($pendaftar->jenis_kelamin ?? '') === 'L' ? 'checked' : '' }}> Laki-laki</label>
+              <label class="radio-option"><input type="radio" name="jenis_kelamin" value="P" {{ ($pendaftar->jenis_kelamin ?? '') === 'P' ? 'checked' : '' }}> Perempuan</label>
             </div>
           </div>
           <div class="field">
             <label>Memiliki Kebutuhan Khusus?<span class="req">*</span></label>
             <div class="radio-group">
-              <label class="radio-option"><input type="radio" name="kebutuhan_khusus" value="ya"> Ya</label>
-              <label class="radio-option"><input type="radio" name="kebutuhan_khusus" value="tidak"> Tidak</label>
+              <label class="radio-option"><input type="radio" name="kebutuhan_khusus" value="ya" {{ strtolower($pendaftar->kebutuhan_khusus ?? '') === 'ya' ? 'checked' : '' }}> Ya</label>
+              <label class="radio-option"><input type="radio" name="kebutuhan_khusus" value="tidak" {{ strtolower($pendaftar->kebutuhan_khusus ?? '') === 'tidak' ? 'checked' : '' }}> Tidak</label>
             </div>
           </div>
         </div>
 
         <div class="row-2">
-          <div class="field"><label>Agama<span class="req">*</span></label><input type="text" id="input_agama" class="req"></div>
+          <div class="field"><label>Agama<span class="req">*</span></label><input type="text" id="input_agama" class="req" value="{{ $pendaftar->agama ?? '' }}"></div>
           <div class="field">
             <label>Penerima KPS / KKS / KIP?<span class="req">*</span></label>
             <div class="radio-group">
-              <label class="radio-option"><input type="radio" name="is_penerima_bantuan" value="ya" onclick="toggleKphCard(true)"> Ya</label>
-              <label class="radio-option"><input type="radio" name="is_penerima_bantuan" value="tidak" onclick="toggleKphCard(false)"> Tidak</label>
+              @php $isPenerima = strtolower($pendaftar->dokumen->is_penerima_bantuan ?? 'tidak') === 'ya'; @endphp
+              <label class="radio-option"><input type="radio" name="is_penerima_bantuan" value="ya" {{ $isPenerima ? 'checked' : '' }} onclick="toggleKphCard(true)"> Ya</label>
+              <label class="radio-option"><input type="radio" name="is_penerima_bantuan" value="tidak" {{ !$isPenerima ? 'checked' : '' }} onclick="toggleKphCard(false)"> Tidak</label>
             </div>
           </div>
         </div>
 
-        <div class="row-1 conditional-box" id="kph-card-selection">
+        <div class="row-1 conditional-box" id="kph-card-selection" style="{{ $isPenerima ? '' : 'display:none;' }}">
           <div class="field">
             <label>Pilih Jenis Kartu yang Dimiliki</label>
             <div class="checkbox-group-container">
-              <label class="radio-option"><input type="checkbox" name="jenis_bantuan" value="KPS"> KPS (Kartu Perlindungan Sosial)</label>
-              <label class="radio-option"><input type="checkbox" name="jenis_bantuan" value="KKS"> KKS (Kartu Keluarga Sejahtera)</label>
-              <label class="radio-option"><input type="checkbox" name="jenis_bantuan" value="KIP"> KIP (Kartu Indonesia Pintar)</label>
+              @php $jenisBantuanTersimpan = json_decode($pendaftar->dokumen->jenis_bantuan ?? '[]', true) ?: []; @endphp
+              <label class="radio-option"><input type="checkbox" name="jenis_bantuan" value="KPS" {{ in_array('kps', $jenisBantuanTersimpan) ? 'checked' : '' }}> KPS (Kartu Perlindungan Sosial)</label>
+              <label class="radio-option"><input type="checkbox" name="jenis_bantuan" value="KKS" {{ in_array('kks', $jenisBantuanTersimpan) ? 'checked' : '' }}> KKS (Kartu Keluarga Sejahtera)</label>
+              <label class="radio-option"><input type="checkbox" name="jenis_bantuan" value="KIP" {{ in_array('kip', $jenisBantuanTersimpan) ? 'checked' : '' }}> KIP (Kartu Indonesia Pintar)</label>
             </div>
           </div>
         </div>
@@ -812,52 +815,53 @@
         </div>
 
         <!-- DATA AYAH -->
+        @php $ortu = $pendaftar->dataOrangTua ?? null; @endphp
         <div class="parent-block">
           <div class="parent-block-title"><i class="fa-solid fa-person"></i> Data Ayah</div>
           <div class="row-2">
-            <div class="field"><label>Nama Ayah<span class="req">*</span></label><input type="text" id="input_namaAyah" class="req"></div>
+            <div class="field"><label>Nama Ayah<span class="req">*</span></label><input type="text" id="input_namaAyah" class="req" value="{{ $ortu->nama_ayah ?? '' }}"></div>
             <div class="field">
               <label>Pendidikan Terakhir<span class="req">*</span></label>
               <select id="select_pendidikanAyah" class="req">
-                <option value="" disabled selected>Pilih Pendidikan Terakhir</option>
-                <option value="tidak_sekolah">Tidak Sekolah</option>
-                <option value="sd">SD / MI / Sederajat</option> 
-                <option value="smp">SMP / Mts / Sederajat</option>
-                <option value="sma">SMA / MA / SMK</option>
-                <option value="diploma">D1 / D2 / D3</option>
-                <option value="s1">S1 / D4</option>
-                <option value="s2">S2 / S3</option>
+                <option value="" disabled {{ empty($ortu->pendidikan_terakhir_ayah) ? 'selected' : '' }}>Pilih Pendidikan Terakhir</option>
+                <option value="tidak_sekolah" {{ ($ortu->pendidikan_terakhir_ayah ?? '') === 'tidak_sekolah' ? 'selected' : '' }}>Tidak Sekolah</option>
+                <option value="sd" {{ ($ortu->pendidikan_terakhir_ayah ?? '') === 'sd' ? 'selected' : '' }}>SD / MI / Sederajat</option> 
+                <option value="smp" {{ ($ortu->pendidikan_terakhir_ayah ?? '') === 'smp' ? 'selected' : '' }}>SMP / Mts / Sederajat</option>
+                <option value="sma" {{ ($ortu->pendidikan_terakhir_ayah ?? '') === 'sma' ? 'selected' : '' }}>SMA / MA / SMK</option>
+                <option value="diploma" {{ ($ortu->pendidikan_terakhir_ayah ?? '') === 'diploma' ? 'selected' : '' }}>D1 / D2 / D3</option>
+                <option value="s1" {{ ($ortu->pendidikan_terakhir_ayah ?? '') === 's1' ? 'selected' : '' }}>S1 / D4</option>
+                <option value="s2" {{ ($ortu->pendidikan_terakhir_ayah ?? '') === 's2' ? 'selected' : '' }}>S2 / S3</option>
               </select>
             </div>
           </div>
 
           <div class="row-2">
-            <div class="field"><label>Pekerjaan Ayah<span class="req">*</span></label><input type="text" id="input_pekerjaanAyah" class="req"></div>
-            <div class="field"><label>Tahun Lahir<span class="req">*</span></label><input type="text" id="input_tahunAyah" class="req"></div>
+            <div class="field"><label>Pekerjaan Ayah<span class="req">*</span></label><input type="text" id="input_pekerjaanAyah" class="req" value="{{ $ortu->pekerjaan_ayah ?? '' }}"></div>
+            <div class="field"><label>Tahun Lahir<span class="req">*</span></label><input type="text" id="input_tahunAyah" class="req" value="{{ $ortu->tahun_lahir_ayah ?? '' }}"></div>
           </div>
 
           <div class="row-2">
             <div class="field">
               <label>Penghasilan Bulanan<span class="req">*</span></label>
               <select id="select_penghasilanAyah" class="req">
-                <option value="" disabled selected>Pilih Penghasilan Bulanan</option>
-                <option value="tidak_berpenghasilan">Tidak Berpenghasilan / Tidak Bekerja</option>
-                <option value="kurang_1jt">Kurang dari Rp 1.000.000</option>
-                <option value="1jt_2jt">Rp 1.000.000 - Rp 1.999.999</option>
-                <option value="2jt_5jt">Rp 2.000.000 - Rp 4.999.999</option>
-                <option value="5jt_20jt">Rp 5.000.000 - Rp 20.000.000</option>
-                <option value="lebih_20jt">Lebih dari Rp 20.000.000</option>
+                <option value="" disabled {{ empty($ortu->penghasilan_ayah_bulanan) ? 'selected' : '' }}>Pilih Penghasilan Bulanan</option>
+                <option value="tidak_berpenghasilan" {{ ($ortu->penghasilan_ayah_bulanan ?? '') === 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
+                <option value="kurang_1jt" {{ ($ortu->penghasilan_ayah_bulanan ?? '') === 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
+                <option value="1jt_2jt" {{ ($ortu->penghasilan_ayah_bulanan ?? '') === '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
+                <option value="2jt_5jt" {{ ($ortu->penghasilan_ayah_bulanan ?? '') === '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
+                <option value="5jt_20jt" {{ ($ortu->penghasilan_ayah_bulanan ?? '') === '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
+                <option value="lebih_20jt" {{ ($ortu->penghasilan_ayah_bulanan ?? '') === 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
               </select>
             </div>
-            <div class="field"><label>Nomor Telepon Ayah<span class="req">*</span></label><input type="text" id="input_hpAyah" class="req"></div>
+            <div class="field"><label>Nomor Telepon Ayah<span class="req">*</span></label><input type="text" id="input_hpAyah" class="req" value="{{ $ortu->no_hp_ayah ?? '' }}"></div>
           </div>
 
           <div class="row-1">
             <div class="field">
               <label>Memiliki Kebutuhan Khusus?<span class="req">*</span></label>
               <div class="radio-group">
-                <label class="radio-option"><input type="radio" name="ayah_kebutuhan_khusus" value="ya"> Ya</label>
-                <label class="radio-option"><input type="radio" name="ayah_kebutuhan_khusus" value="tidak"> Tidak</label>
+                <label class="radio-option"><input type="radio" name="ayah_kebutuhan_khusus" value="ya" {{ strtolower($ortu->ayah_kebutuhan_khusus ?? '') === 'ya' ? 'checked' : '' }}> Ya</label>
+                <label class="radio-option"><input type="radio" name="ayah_kebutuhan_khusus" value="tidak" {{ strtolower($ortu->ayah_kebutuhan_khusus ?? '') === 'tidak' ? 'checked' : '' }}> Tidak</label>
               </div>
             </div>
           </div>
@@ -867,49 +871,49 @@
         <div class="parent-block">
           <div class="parent-block-title"><i class="fa-solid fa-person-dress"></i> Data Ibu</div>
           <div class="row-2">
-            <div class="field"><label>Nama Ibu<span class="req">*</span></label><input type="text" id="input_namaIbu" class="req"></div>
+            <div class="field"><label>Nama Ibu<span class="req">*</span></label><input type="text" id="input_namaIbu" class="req" value="{{ $ortu->nama_ibu ?? '' }}"></div>
             <div class="field">
               <label>Pendidikan Terakhir<span class="req">*</span></label>
               <select id="select_pendidikanIbu" class="req">
-                <option value="" disabled selected>Pilih Pendidikan Terakhir</option>
-                <option value="tidak_sekolah">Tidak Sekolah</option>
-                <option value="sd">SD / MI / Sederajat</option> 
-                <option value="smp">SMP / Mts / Sederajat</option>
-                <option value="sma">SMA / MA / SMK</option>
-                <option value="diploma">D1 / D2 / D3</option>
-                <option value="s1">S1 / D4</option>
-                <option value="s2">S2 / S3</option>
+                <option value="" disabled {{ empty($ortu->pendidikan_terakhir_ibu) ? 'selected' : '' }}>Pilih Pendidikan Terakhir</option>
+                <option value="tidak_sekolah" {{ ($ortu->pendidikan_terakhir_ibu ?? '') === 'tidak_sekolah' ? 'selected' : '' }}>Tidak Sekolah</option>
+                <option value="sd" {{ ($ortu->pendidikan_terakhir_ibu ?? '') === 'sd' ? 'selected' : '' }}>SD / MI / Sederajat</option> 
+                <option value="smp" {{ ($ortu->pendidikan_terakhir_ibu ?? '') === 'smp' ? 'selected' : '' }}>SMP / Mts / Sederajat</option>
+                <option value="sma" {{ ($ortu->pendidikan_terakhir_ibu ?? '') === 'sma' ? 'selected' : '' }}>SMA / MA / SMK</option>
+                <option value="diploma" {{ ($ortu->pendidikan_terakhir_ibu ?? '') === 'diploma' ? 'selected' : '' }}>D1 / D2 / D3</option>
+                <option value="s1" {{ ($ortu->pendidikan_terakhir_ibu ?? '') === 's1' ? 'selected' : '' }}>S1 / D4</option>
+                <option value="s2" {{ ($ortu->pendidikan_terakhir_ibu ?? '') === 's2' ? 'selected' : '' }}>S2 / S3</option>
               </select>
             </div>
           </div>
 
           <div class="row-2">
-            <div class="field"><label>Pekerjaan Ibu<span class="req">*</span></label><input type="text" id="input_pekerjaanIbu" class="req"></div>
-            <div class="field"><label>Tahun Lahir<span class="req">*</span></label><input type="text" id="input_tahunIbu" class="req"></div>
+            <div class="field"><label>Pekerjaan Ibu<span class="req">*</span></label><input type="text" id="input_pekerjaanIbu" class="req" value="{{ $ortu->pekerjaan_ibu ?? '' }}"></div>
+            <div class="field"><label>Tahun Lahir<span class="req">*</span></label><input type="text" id="input_tahunIbu" class="req" value="{{ $ortu->tahun_lahir_ibu ?? '' }}"></div>
           </div>
 
           <div class="row-2">
             <div class="field">
               <label>Penghasilan Bulanan<span class="req">*</span></label>
               <select id="select_penghasilanIbu" class="req">
-                <option value="" disabled selected>Pilih Penghasilan Bulanan</option>
-                <option value="tidak_berpenghasilan">Tidak Berpenghasilan / Tidak Bekerja</option>
-                <option value="kurang_1jt">Kurang dari Rp 1.000.000</option>
-                <option value="1jt_2jt">Rp 1.000.000 - Rp 1.999.999</option>
-                <option value="2jt_5jt">Rp 2.000.000 - Rp 4.999.999</option>
-                <option value="5jt_20jt">Rp 5.000.000 - Rp 20.000.000</option>
-                <option value="lebih_20jt">Lebih dari Rp 20.000.000</option>
+                <option value="" disabled {{ empty($ortu->penghasilan_ibu_bulanan) ? 'selected' : '' }}>Pilih Penghasilan Bulanan</option>
+                <option value="tidak_berpenghasilan" {{ ($ortu->penghasilan_ibu_bulanan ?? '') === 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
+                <option value="kurang_1jt" {{ ($ortu->penghasilan_ibu_bulanan ?? '') === 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
+                <option value="1jt_2jt" {{ ($ortu->penghasilan_ibu_bulanan ?? '') === '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
+                <option value="2jt_5jt" {{ ($ortu->penghasilan_ibu_bulanan ?? '') === '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
+                <option value="5jt_20jt" {{ ($ortu->penghasilan_ibu_bulanan ?? '') === '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
+                <option value="lebih_20jt" {{ ($ortu->penghasilan_ibu_bulanan ?? '') === 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
               </select>
             </div>
-            <div class="field"><label>Nomor Telepon Ibu<span class="req">*</span></label><input type="text" id="input_hpIbu" class="req"></div>
+            <div class="field"><label>Nomor Telepon Ibu<span class="req">*</span></label><input type="text" id="input_hpIbu" class="req" value="{{ $ortu->no_hp_ibu ?? '' }}"></div>
           </div>
 
           <div class="row-1">
             <div class="field">
               <label>Memiliki Kebutuhan Khusus?<span class="req">*</span></label>
               <div class="radio-group">
-                <label class="radio-option"><input type="radio" name="ibu_kebutuhan_khusus" value="ya"> Ya</label>
-                <label class="radio-option"><input type="radio" name="ibu_kebutuhan_khusus" value="tidak"> Tidak</label>
+                <label class="radio-option"><input type="radio" name="ibu_kebutuhan_khusus" value="ya" {{ strtolower($ortu->ibu_kebutuhan_khusus ?? '') === 'ya' ? 'checked' : '' }}> Ya</label>
+                <label class="radio-option"><input type="radio" name="ibu_kebutuhan_khusus" value="tidak" {{ strtolower($ortu->ibu_kebutuhan_khusus ?? '') === 'tidak' ? 'checked' : '' }}> Tidak</label>
               </div>
             </div>
           </div>
@@ -919,40 +923,40 @@
         <div class="parent-block">
           <div class="parent-block-title"><i class="fa-solid fa-user-shield"></i> Data Wali (Diisi jika tidak tinggal dengan Orang Tua)</div>
           <div class="row-2">
-            <div class="field"><label>Nama Wali</label><input type="text" id="input_nama_wali"></div>
+            <div class="field"><label>Nama Wali</label><input type="text" id="input_nama_wali" value="{{ $ortu->nama_wali ?? '' }}"></div>
             <div class="field">
               <label>Pendidikan Terakhir Wali</label>
               <select id="pendidikan_wali">
-                <option value="" disabled selected>Pilih Pendidikan Terakhir</option>
-                <option value="tidak_sekolah">Tidak Sekolah</option>
-                <option value="sd">SD / MI / Sederajat</option> 
-                <option value="smp">SMP / Mts / Sederajat</option>
-                <option value="sma">SMA / MA / SMK</option>
-                <option value="diploma">D1 / D2 / D3</option>
-                <option value="s1">S1 / D4</option>
-                <option value="s2">S2 / S3</option>
+                <option value="" disabled {{ empty($ortu->pendidikan_terakhir_wali) ? 'selected' : '' }}>Pilih Pendidikan Terakhir</option>
+                <option value="tidak_sekolah" {{ ($ortu->pendidikan_terakhir_wali ?? '') === 'tidak_sekolah' ? 'selected' : '' }}>Tidak Sekolah</option>
+                <option value="sd" {{ ($ortu->pendidikan_terakhir_wali ?? '') === 'sd' ? 'selected' : '' }}>SD / MI / Sederajat</option> 
+                <option value="smp" {{ ($ortu->pendidikan_terakhir_wali ?? '') === 'smp' ? 'selected' : '' }}>SMP / Mts / Sederajat</option>
+                <option value="sma" {{ ($ortu->pendidikan_terakhir_wali ?? '') === 'sma' ? 'selected' : '' }}>SMA / MA / SMK</option>
+                <option value="diploma" {{ ($ortu->pendidikan_terakhir_wali ?? '') === 'diploma' ? 'selected' : '' }}>D1 / D2 / D3</option>
+                <option value="s1" {{ ($ortu->pendidikan_terakhir_wali ?? '') === 's1' ? 'selected' : '' }}>S1 / D4</option>
+                <option value="s2" {{ ($ortu->pendidikan_terakhir_wali ?? '') === 's2' ? 'selected' : '' }}>S2 / S3</option>
               </select>
             </div>
           </div>
 
           <div class="row-2">
-            <div class="field"><label>Pekerjaan Wali</label><input type="text" id="input_pekerjaan_wali"></div>
+            <div class="field"><label>Pekerjaan Wali</label><input type="text" id="input_pekerjaan_wali" value="{{ $ortu->pekerjaan_wali ?? '' }}"></div>
             <div class="field">
               <label>Penghasilan Bulanan</label>
               <select id="penghasilan_wali_select">
-                <option value="" disabled selected>Pilih Penghasilan Bulanan</option>
-                <option value="tidak_berpenghasilan">Tidak Berpenghasilan / Tidak Bekerja</option>
-                <option value="kurang_1jt">Kurang dari Rp 1.000.000</option>
-                <option value="1jt_2jt">Rp 1.000.000 - Rp 1.999.999</option>
-                <option value="2jt_5jt">Rp 2.000.000 - Rp 4.999.999</option>
-                <option value="5jt_20jt">Rp 5.000.000 - Rp 20.000.000</option>
-                <option value="lebih_20jt">Lebih dari Rp 20.000.000</option>
+                <option value="" disabled {{ empty($ortu->penghasilan_wali_bulanan) ? 'selected' : '' }}>Pilih Penghasilan Bulanan</option>
+                <option value="tidak_berpenghasilan" {{ ($ortu->penghasilan_wali_bulanan ?? '') === 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
+                <option value="kurang_1jt" {{ ($ortu->penghasilan_wali_bulanan ?? '') === 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
+                <option value="1jt_2jt" {{ ($ortu->penghasilan_wali_bulanan ?? '') === '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
+                <option value="2jt_5jt" {{ ($ortu->penghasilan_wali_bulanan ?? '') === '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
+                <option value="5jt_20jt" {{ ($ortu->penghasilan_wali_bulanan ?? '') === '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
+                <option value="lebih_20jt" {{ ($ortu->penghasilan_wali_bulanan ?? '') === 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
               </select>
             </div>
           </div>
 
           <div class="row-1">
-            <div class="field"><label>Nomor Telepon Wali</label><input type="text" id="input_nomor_telepon_wali"></div>
+            <div class="field"><label>Nomor Telepon Wali</label><input type="text" id="input_nomor_telepon_wali" value="{{ $ortu->no_hp_wali ?? '' }}"></div>
           </div>
         </div>
 
@@ -972,7 +976,7 @@
               <option value="">Pilih Provinsi</option>
             </select>
           </div>
-          <div class="field"><label>Alamat Lengkap<span class="req">*</span></label><input type="text" id="input_alamatLengkap" class="req"></div>
+          <div class="field"><label>Alamat Lengkap<span class="req">*</span></label><input type="text" id="input_alamatLengkap" class="req" value="{{ $pendaftar->alamat_lengkap ?? '' }}"></div>
         </div>
 
         <div class="row-2">
@@ -985,8 +989,8 @@
           <div class="field">
             <label>RT / RW<span class="req">*</span></label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <input type="number" id="input_rt" class="req" placeholder="RT">
-              <input type="number" id="input_rw" class="req" placeholder="RW">
+              <input type="number" id="input_rt" class="req" placeholder="RT" value="{{ $pendaftar->rt ?? '' }}">
+              <input type="number" id="input_rw" class="req" placeholder="RW" value="{{ $pendaftar->rw ?? '' }}">
             </div>
           </div>
         </div>
@@ -1001,11 +1005,11 @@
           <div class="field">
             <label>Jenis Tinggal<span class="req">*</span></label>
             <select id="select_jenisTinggal" class="req">
-              <option value="" disabled selected>Pilih Jenis Tinggal</option>
-              <option value="Rumah (Bersama Orang Tua)">Rumah (Bersama Orang Tua)</option>
-              <option value="Wali">Asrama</option>
-              <option value="Kos">Kos / Kontrak</option>
-              <option value="Pondok Pesantren">Pondok Pesantren</option>
+              <option value="" disabled {{ empty($pendaftar->jenis_tinggal) ? 'selected' : '' }}>Pilih Jenis Tinggal</option>
+              <option value="Rumah (Bersama Orang Tua)" {{ ($pendaftar->jenis_tinggal ?? '') === 'Rumah (Bersama Orang Tua)' ? 'selected' : '' }}>Rumah (Bersama Orang Tua)</option>
+              <option value="Wali" {{ ($pendaftar->jenis_tinggal ?? '') === 'Wali' ? 'selected' : '' }}>Asrama</option>
+              <option value="Kos" {{ ($pendaftar->jenis_tinggal ?? '') === 'Kos' ? 'selected' : '' }}>Kos / Kontrak</option>
+              <option value="Pondok Pesantren" {{ ($pendaftar->jenis_tinggal ?? '') === 'Pondok Pesantren' ? 'selected' : '' }}>Pondok Pesantren</option>
             </select>
           </div>
         </div>
@@ -1017,12 +1021,12 @@
               <option value="">Pilih Kelurahan/Desa</option>
             </select>
           </div>
-          <div class="field"><label>Alat Transportasi<span class="req">*</span></label><input type="text" id="input_transportasi" class="req"></div>
+          <div class="field"><label>Alat Transportasi<span class="req">*</span></label><input type="text" id="input_transportasi" class="req" value="{{ $pendaftar->alat_transportasi_ke_sekolah ?? '' }}"></div>
         </div>
 
         <div class="row-2">
-          <div class="field"><label>Kode Pos<span class="req">*</span></label><input type="number" id="input_kodePos" class="req"></div>
-          <div class="field"><label>Jarak ke Sekolah<span class="req">*</span></label><input type="text" id="input_jarakSekolah" class="req"></div>
+          <div class="field"><label>Kode Pos<span class="req">*</span></label><input type="number" id="input_kodePos" class="req" value="{{ $pendaftar->kode_pos ?? '' }}"></div>
+          <div class="field"><label>Jarak ke Sekolah<span class="req">*</span></label><input type="text" id="input_jarakSekolah" class="req" value="{{ $pendaftar->jarak_ke_sekolah ?? '' }}"></div>
         </div>
       </div>
 
@@ -1037,18 +1041,18 @@
           <div class="field">
             <label>Pilihan Kompetensi Keahlian (Jurusan 1)<span class="req">*</span></label>
             <div class="radio-group">
-              <label class="radio-option"><input type="radio" name="jurusan_1" value="PPLG"> PPLG</label>
-              <label class="radio-option"><input type="radio" name="jurusan_1" value="BCF"> BCF</label>
-              <label class="radio-option"><input type="radio" name="jurusan_1" value="MPLB"> MPLB</label>
+              <label class="radio-option"><input type="radio" name="jurusan_1" value="PPLG" {{ ($pendaftar->jurusan_pilihan_1 ?? '') === 'PPLG' ? 'checked' : '' }}> PPLG</label>
+              <label class="radio-option"><input type="radio" name="jurusan_1" value="BCF" {{ ($pendaftar->jurusan_pilihan_1 ?? '') === 'BCF' ? 'checked' : '' }}> BCF</label>
+              <label class="radio-option"><input type="radio" name="jurusan_1" value="MPLB" {{ ($pendaftar->jurusan_pilihan_1 ?? '') === 'MPLB' ? 'checked' : '' }}> MPLB</label>
             </div>
           </div>
 
           <div class="field">
             <label>Pilihan Kompetensi Keahlian (Jurusan 2)<span class="req">*</span></label>
             <div class="radio-group">
-              <label class="radio-option"><input type="radio" name="jurusan_2" value="PPLG"> PPLG</label>
-              <label class="radio-option"><input type="radio" name="jurusan_2" value="BCF"> BCF</label>
-              <label class="radio-option"><input type="radio" name="jurusan_2" value="MPLB"> MPLB</label>
+              <label class="radio-option"><input type="radio" name="jurusan_2" value="PPLG" {{ ($pendaftar->jurusan_pilihan_2 ?? '') === 'PPLG' ? 'checked' : '' }}> PPLG</label>
+              <label class="radio-option"><input type="radio" name="jurusan_2" value="BCF" {{ ($pendaftar->jurusan_pilihan_2 ?? '') === 'BCF' ? 'checked' : '' }}> BCF</label>
+              <label class="radio-option"><input type="radio" name="jurusan_2" value="MPLB" {{ ($pendaftar->jurusan_pilihan_2 ?? '') === 'MPLB' ? 'checked' : '' }}> MPLB</label>
             </div>
           </div>
         </div>
@@ -1057,27 +1061,27 @@
           <div class="field">
             <label>Pilih Gelombang Pendaftaran<span class="req">*</span></label>
             <select id="gelombang_pendaftaran" class="req" onchange="toggleGelombang(this.value)">
-              <option value="" disabled selected>Pilih Gelombang Pendaftaran</option>
-              <option value="Gelombang 1">Gelombang 1 (Januari - Maret 2026)</option>
-              <option value="Gelombang 2">Gelombang 2 (April - Juli 2026)</option>
+              <option value="" disabled {{ empty($pendaftar->gelombang) ? 'selected' : '' }}>Pilih Gelombang Pendaftaran</option>
+              <option value="Gelombang 1" {{ ($pendaftar->gelombang ?? '') === 'Gelombang 1' ? 'selected' : '' }}>Gelombang 1 (Januari - Maret 2026)</option>
+              <option value="Gelombang 2" {{ ($pendaftar->gelombang ?? '') === 'Gelombang 2' ? 'selected' : '' }}>Gelombang 2 (April - Juli 2026)</option>
             </select>
           </div>
         </div>
 
         <!-- METODE PEMBAYARAN KONDISIONAL -->
-        <div class="row-1 conditional-box" id="metode-pembayaran-container">
+        <div class="row-1 conditional-box" id="metode-pembayaran-container" style="{{ ($pendaftar->gelombang ?? '') === 'Gelombang 2' ? '' : 'display:none;' }}">
           <div class="field">
             <label>Pilih Metode Pembayaran Pendaftaran (Rp 20.000)<span class="req">*</span></label>
             <select id="metode_pembayaran" onchange="toggleMetodePembayaran(this.value)">
-              <option value="" disabled selected>Pilih Metode Pembayaran</option>
-              <option value="langsung">Bayar Langsung di Sekolah (Cash)</option>
-              <option value="transfer">Transfer Bank (Via TF)</option>
+              <option value="" disabled {{ empty($pendaftar->metode_pembayaran) ? 'selected' : '' }}>Pilih Metode Pembayaran</option>
+              <option value="langsung" {{ ($pendaftar->metode_pembayaran ?? '') === 'langsung' ? 'selected' : '' }}>Bayar Langsung di Sekolah (Cash)</option>
+              <option value="transfer" {{ ($pendaftar->metode_pembayaran ?? '') === 'transfer' ? 'selected' : '' }}>Transfer Bank (Via TF)</option>
             </select>
           </div>
         </div>
 
         <!-- INFO REKENING -->
-        <div class="row-1 conditional-box" id="info-rekening-box">
+        <div class="row-1 conditional-box" id="info-rekening-box" style="{{ ($pendaftar->metode_pembayaran ?? '') === 'transfer' ? '' : 'display:none;' }}">
           <div style="background-color: #e6f4f0; border: 1px solid #02403f; padding: 15px 20px; border-radius: 8px; font-size: 13px; color: #02403f;">
             <strong><i class="fa-solid fa-building-columns"></i> Informasi Rekening Pembayaran:</strong><br>
             Bank: <strong>Bank Jateng</strong><br>
@@ -1329,122 +1333,59 @@ async function loadKelurahan(kecId, selectedVal = '') {
   }
 }
 
-// BACA DATA DARI LOCALSTORAGE & AUTO-FILL KETIKA HALAMAN DIMUAT
+// PRESELECT PROVINSI/KABUPATEN/KECAMATAN/DESA BERDASARKAN NAMA YANG TERSIMPAN DI SERVER
+// (Data di database berupa NAMA, bukan kode emsifa, jadi kita cari option yang teksnya cocok)
+const namaProvinsiTersimpan = @json($pendaftar->provinsi ?? '');
+const namaKabupatenTersimpan = @json($pendaftar->kabupaten ?? '');
+const namaKecamatanTersimpan = @json($pendaftar->kecamatan ?? '');
+const namaDesaTersimpan = @json($pendaftar->desa ?? '');
+
+function cariValueOptionByText(selectEl, teks) {
+  if (!teks) return '';
+  const target = teks.trim().toLowerCase();
+  const opt = Array.from(selectEl.options).find(o => o.textContent.trim().toLowerCase() === target);
+  return opt ? opt.value : '';
+}
+
+async function preselectWilayahDariNama() {
+  if (!namaProvinsiTersimpan) return;
+
+  const provId = cariValueOptionByText(selectProvinsi, namaProvinsiTersimpan);
+  if (!provId) return;
+  selectProvinsi.value = provId;
+
+  await loadKabupaten(provId);
+  const kabId = cariValueOptionByText(selectKabupaten, namaKabupatenTersimpan);
+  if (!kabId) return;
+  selectKabupaten.value = kabId;
+
+  await loadKecamatan(kabId);
+  const kecId = cariValueOptionByText(selectKecamatan, namaKecamatanTersimpan);
+  if (!kecId) return;
+  selectKecamatan.value = kecId;
+
+  await loadKelurahan(kecId);
+  const desaId = cariValueOptionByText(selectKelurahan, namaDesaTersimpan);
+  if (desaId) selectKelurahan.value = desaId;
+}
+
+// SEMUA FIELD SUDAH DI-ISI LANGSUNG DARI SERVER LEWAT BLADE,
+// jadi di sini cuma perlu: (1) load daftar provinsi, (2) preselect wilayah by nama,
+// (3) trigger tampilan kondisional (kartu bantuan, metode pembayaran) sesuai data yang sudah keisi.
 document.addEventListener('DOMContentLoaded', async function() {
   await loadProvinces();
-  const data = JSON.parse(localStorage.getItem('data_pendaftaran'));
+  await preselectWilayahDariNama();
 
-  if (data) {
-    if (data.nama) {
-      document.getElementById('namaSiswaDisplay').innerText = data.nama;
-      document.getElementById('input_nama').value = data.nama;
-    }
-    if (data.nisn) {
-      document.getElementById('nisnDisplay').innerText = 'NISN: ' + data.nisn;
-      document.getElementById('input_nisn').value = data.nisn;
-    }
-    if (data.lastUpdated) {
-      document.getElementById('lastUpdated').innerText = data.lastUpdated;
-    }
+  const namaSiswaEl = document.getElementById('namaSiswaDisplay');
+  if (namaSiswaEl) namaSiswaEl.innerText = @json($pendaftar->nama_lengkap ?? 'Calon Siswa');
 
-    if (data.asalSekolah) document.getElementById('input_asalSekolah').value = data.asalSekolah;
-    if (data.hp) document.getElementById('input_hp').value = data.hp;
-    if (data.tempatLahir) document.getElementById('input_tempatLahir').value = data.tempatLahir;
-    if (data.tglLahir) document.getElementById('input_tglLahir').value = data.tglLahir;
-    if (data.tinggi) document.getElementById('input_tinggi').value = data.tinggi;
-    if (data.berat) document.getElementById('input_berat').value = data.berat;
-    if (data.jumlahSaudara) document.getElementById('input_jumlahSaudara').value = data.jumlahSaudara;
-    if (data.agama) document.getElementById('input_agama').value = data.agama;
+  const nisnEl = document.getElementById('nisnDisplay');
+  if (nisnEl) nisnEl.innerText = 'NISN: ' + @json($pendaftar->nisn ?? '-');
 
-    if (data.jenisKelamin) {
-      const radioJK = document.querySelector(`input[name="jenis_kelamin"][value="${data.jenisKelamin}"]`);
-      if (radioJK) radioJK.checked = true;
-    }
-
-    if (data.kebutuhanKhusus) {
-      const radioKhusus = document.querySelector(`input[name="kebutuhan_khusus"][value="${data.kebutuhanKhusus}"]`);
-      if (radioKhusus) radioKhusus.checked = true;
-    }
-
-    if (data.penerimaKps) {
-      const radioKps = document.querySelector(`input[name="penerima_kps"][value="${data.penerimaKps}"]`);
-      if (radioKps) radioKps.checked = true;
-      if (data.penerimaKps === 'ya') {
-        toggleKphCard(true);
-        if (data.jenisKartu && Array.isArray(data.jenisKartu)) {
-          data.jenisKartu.forEach(val => {
-            const cb = document.querySelector(`input[name="jenis_kartu"][value="${val}"]`);
-            if (cb) cb.checked = true;
-          });
-        }
-      } else {
-        toggleKphCard(false);
-      }
-    }
-
-    if (data.namaAyah) document.getElementById('input_namaAyah').value = data.namaAyah;
-    if (data.pendidikanAyah) document.getElementById('select_pendidikanAyah').value = data.pendidikanAyah;
-    if (data.pekerjaanAyah) document.getElementById('input_pekerjaanAyah').value = data.pekerjaanAyah;
-    if (data.tahunAyah) document.getElementById('input_tahunAyah').value = data.tahunAyah;
-    if (data.penghasilanAyah) document.getElementById('select_penghasilanAyah').value = data.penghasilanAyah;
-    if (data.hpAyah) document.getElementById('input_hpAyah').value = data.hpAyah;
-    if (data.khususAyah) {
-      const radioKhususAyah = document.querySelector(`input[name="kebutuhan_khusus_ayah"][value="${data.khususAyah}"]`);
-      if (radioKhususAyah) radioKhususAyah.checked = true;
-    }
-
-    if (data.namaIbu) document.getElementById('input_namaIbu').value = data.namaIbu;
-    if (data.pendidikanIbu) document.getElementById('select_pendidikanIbu').value = data.pendidikanIbu;
-    if (data.pekerjaanIbu) document.getElementById('input_pekerjaanIbu').value = data.pekerjaanIbu;
-    if (data.tahunIbu) document.getElementById('input_tahunIbu').value = data.tahunIbu;
-    if (data.penghasilanIbu) document.getElementById('select_penghasilanIbu').value = data.penghasilanIbu;
-    if (data.hpIbu) document.getElementById('input_hpIbu').value = data.hpIbu;
-    if (data.khususIbu) {
-      const radioKhususIbu = document.querySelector(`input[name="kebutuhan_khusus_ibu"][value="${data.khususIbu}"]`);
-      if (radioKhususIbu) radioKhususIbu.checked = true;
-    }
-
-    if (data.namaWali) document.getElementById('input_nama_wali').value = data.namaWali;
-    if (data.pendidikanWali) document.getElementById('pendidikan_wali').value = data.pendidikanWali;
-    if (data.pekerjaanWali) document.getElementById('input_pekerjaan_wali').value = data.pekerjaanWali;
-    if (data.penghasilanWali) document.getElementById('penghasilan_wali_select').value = data.penghasilanWali;
-    if (data.hpWali) document.getElementById('input_nomor_telepon_wali').value = data.hpWali;
-
-    if (data.alamatLengkap) document.getElementById('input_alamatLengkap').value = data.alamatLengkap;
-    if (data.rt) document.getElementById('input_rt').value = data.rt;
-    if (data.rw) document.getElementById('input_rw').value = data.rw;
-    if (data.jenisTinggal) document.getElementById('select_jenisTinggal').value = data.jenisTinggal;
-    if (data.transportasi) document.getElementById('input_transportasi').value = data.transportasi;
-    if (data.kodePos) document.getElementById('input_kodePos').value = data.kodePos;
-    if (data.jarakSekolah) document.getElementById('input_jarakSekolah').value = data.jarakSekolah;
-
-    if (data.provinsi) {
-      selectProvinsi.value = data.provinsi;
-      await loadKabupaten(data.provinsi, data.kabupaten);
-      if (data.kabupaten) {
-        await loadKecamatan(data.kabupaten, data.kecamatan);
-        if (data.kecamatan) {
-          await loadKelurahan(data.kecamatan, data.kelurahan);
-        }
-      }
-    }
-
-    if (data.jurusan1) {
-      const radioJ1 = document.querySelector(`input[name="jurusan_1"][value="${data.jurusan1}"]`);
-      if (radioJ1) radioJ1.checked = true;
-    }
-    if (data.jurusan2) {
-      const radioJ2 = document.querySelector(`input[name="jurusan_2"][value="${data.jurusan2}"]`);
-      if (radioJ2) radioJ2.checked = true;
-    }
-    if (data.gelombang) {
-      document.getElementById('gelombang_pendaftaran').value = data.gelombang;
-      toggleGelombang(data.gelombang);
-    }
-    if (data.metodePembayaran) {
-      document.getElementById('metode_pembayaran').value = data.metodePembayaran;
-      toggleMetodePembayaran(data.metodePembayaran);
-    }
+  const lastUpdatedEl = document.getElementById('lastUpdated');
+  if (lastUpdatedEl) {
+    const updatedAt = @json($pendaftar->updated_at ? $pendaftar->updated_at->translatedFormat('d M Y, H:i') : null);
+    lastUpdatedEl.innerText = updatedAt || '-';
   }
 });
 
@@ -1479,123 +1420,130 @@ function validateForm() {
   return isValid;
 }
 
-document.getElementById("btnSimpan").addEventListener("click", () => {
+document.getElementById("btnSimpan").addEventListener("click", async () => {
   if (!validateForm()) {
     showToast("Ada data wajib yang belum diisi. Periksa kembali formulir.", true);
     return;
   }
 
-  const existingData = JSON.parse(localStorage.getItem('data_pendaftaran')) || {};
-
-  const now = new Date();
-  const tanggal = now.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
-  const jam = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-  const updatedTimestamp = `${tanggal}, ${jam} WIB`;
-  document.getElementById("lastUpdated").textContent = updatedTimestamp;
-
+  // CATATAN nama field: HTML pakai "is_penerima_bantuan", "jenis_bantuan",
+  // "ayah_kebutuhan_khusus", "ibu_kebutuhan_khusus" — bukan nama-nama lama
+  // yang dipakai kode sebelumnya (penerima_kps, jenis_kartu, dst).
   const selectedJK = document.querySelector('input[name="jenis_kelamin"]:checked')?.value || 'L';
   const selectedKhususSiswa = document.querySelector('input[name="kebutuhan_khusus"]:checked')?.value || 'tidak';
-  const selectedPenerimaKps = document.querySelector('input[name="penerima_kps"]:checked')?.value || 'tidak';
-
-  const jenisKartuArr = [];
-  if (selectedPenerimaKps === 'ya') {
-    document.querySelectorAll('input[name="jenis_kartu"]:checked').forEach(cb => {
-      jenisKartuArr.push(cb.value);
-    });
-  }
-
-  const selectedKhususAyah = document.querySelector('input[name="kebutuhan_khusus_ayah"]:checked')?.value || 'tidak';
-  const selectedKhususIbu = document.querySelector('input[name="kebutuhan_khusus_ibu"]:checked')?.value || 'tidak';
-  const selectedJ1 = document.querySelector('input[name="jurusan_1"]:checked')?.value || 'PPLG';
-  const selectedJ2 = document.querySelector('input[name="jurusan_2"]:checked')?.value || 'BCF';
+  const selectedPenerimaBantuan = document.querySelector('input[name="is_penerima_bantuan"]:checked')?.value || 'tidak';
+  const selectedKhususAyah = document.querySelector('input[name="ayah_kebutuhan_khusus"]:checked')?.value || 'tidak';
+  const selectedKhususIbu = document.querySelector('input[name="ibu_kebutuhan_khusus"]:checked')?.value || 'tidak';
+  const selectedJ1 = document.querySelector('input[name="jurusan_1"]:checked')?.value || '';
+  const selectedJ2 = document.querySelector('input[name="jurusan_2"]:checked')?.value || '';
 
   const selectProv = document.getElementById('provinsi');
   const selectKab = document.getElementById('kabupaten');
   const selectKec = document.getElementById('kecamatan');
   const selectKel = document.getElementById('kelurahan');
 
-  const selectPendAyah = document.getElementById('select_pendidikanAyah');
-  const selectPenghasilanAyah = document.getElementById('select_penghasilanAyah');
-  const selectPendIbu = document.getElementById('select_pendidikanIbu');
-  const selectPenghasilanIbu = document.getElementById('select_penghasilanIbu');
-  const selectPendWali = document.getElementById('pendidikan_wali');
-  const selectPenghasilanWali = document.getElementById('penghasilan_wali_select');
+  // Yang dikirim & disimpan adalah TEKS nama wilayah (bukan kode dari API emsifa),
+  // konsisten dengan cara data ini disimpan di form pendaftaran awal.
+  const namaProvinsi = selectProv.options[selectProv.selectedIndex]?.text || '';
+  const namaKabupaten = selectKab.options[selectKab.selectedIndex]?.text || '';
+  const namaKecamatan = selectKec.options[selectKec.selectedIndex]?.text || '';
+  const namaDesa = selectKel.options[selectKel.selectedIndex]?.text || '';
 
-  const updatedData = {
-    ...existingData,
-    lastUpdated: updatedTimestamp,
-    nama: document.getElementById('input_nama').value.trim(),
+  const jenisBantuanArr = [];
+  if (selectedPenerimaBantuan === 'ya') {
+    document.querySelectorAll('input[name="jenis_bantuan"]:checked').forEach(cb => {
+      jenisBantuanArr.push(cb.value.toLowerCase());
+    });
+  }
+
+  const payload = {
+    nama_lengkap: document.getElementById('input_nama').value.trim(),
     nisn: document.getElementById('input_nisn').value.trim(),
-    asalSekolah: document.getElementById('input_asalSekolah').value.trim(),
-    hp: document.getElementById('input_hp').value.trim(),
-    tempatLahir: document.getElementById('input_tempatLahir').value.trim(),
-    tglLahir: document.getElementById('input_tglLahir').value,
-    tinggi: document.getElementById('input_tinggi').value.trim(),
-    berat: document.getElementById('input_berat').value.trim(),
-    jumlahSaudara: document.getElementById('input_jumlahSaudara').value.trim(),
-    jenisKelamin: selectedJK,
-    kebutuhanKhusus: selectedKhususSiswa,
+    asal_sekolah: document.getElementById('input_asalSekolah').value.trim(),
+    no_hp: document.getElementById('input_hp').value.trim(),
+    tempat_lahir: document.getElementById('input_tempatLahir').value.trim(),
+    tanggal_lahir: document.getElementById('input_tglLahir').value,
+    tinggi_badan: document.getElementById('input_tinggi').value.trim(),
+    berat_badan: document.getElementById('input_berat').value.trim(),
+    jumlah_saudara_kandung: document.getElementById('input_jumlahSaudara').value.trim(),
+    jenis_kelamin: selectedJK,
+    kebutuhan_khusus: selectedKhususSiswa,
     agama: document.getElementById('input_agama').value.trim(),
-    penerimaKps: selectedPenerimaKps,
-    jenisKartu: jenisKartuArr,
+    is_penerima_bantuan: selectedPenerimaBantuan,
+    jenis_bantuan: jenisBantuanArr,
 
-    namaAyah: document.getElementById('input_namaAyah').value.trim(),
-    pendidikanAyah: selectPendAyah.value,
-    pendidikanAyahText: selectPendAyah.options[selectPendAyah.selectedIndex]?.text || '-',
-    pekerjaanAyah: document.getElementById('input_pekerjaanAyah').value.trim(),
-    tahunAyah: document.getElementById('input_tahunAyah').value.trim(),
-    penghasilanAyah: selectPenghasilanAyah.value,
-    penghasilanAyahText: selectPenghasilanAyah.options[selectPenghasilanAyah.selectedIndex]?.text || '-',
-    hpAyah: document.getElementById('input_hpAyah').value.trim(),
-    khususAyah: selectedKhususAyah,
+    nama_ayah: document.getElementById('input_namaAyah').value.trim(),
+    pendidikan_terakhir_ayah: document.getElementById('select_pendidikanAyah').value,
+    pekerjaan_ayah: document.getElementById('input_pekerjaanAyah').value.trim(),
+    tahun_lahir_ayah: document.getElementById('input_tahunAyah').value.trim(),
+    penghasilan_ayah_bulanan: document.getElementById('select_penghasilanAyah').value,
+    no_hp_ayah: document.getElementById('input_hpAyah').value.trim(),
+    ayah_kebutuhan_khusus: selectedKhususAyah,
 
-    namaIbu: document.getElementById('input_namaIbu').value.trim(),
-    pendidikanIbu: selectPendIbu.value,
-    pendidikanIbuText: selectPendIbu.options[selectPendIbu.selectedIndex]?.text || '-',
-    pekerjaanIbu: document.getElementById('input_pekerjaanIbu').value.trim(),
-    tahunIbu: document.getElementById('input_tahunIbu').value.trim(),
-    penghasilanIbu: selectPenghasilanIbu.value,
-    penghasilanIbuText: selectPenghasilanIbu.options[selectPenghasilanIbu.selectedIndex]?.text || '-',
-    hpIbu: document.getElementById('input_hpIbu').value.trim(),
-    khususIbu: selectedKhususIbu,
+    nama_ibu: document.getElementById('input_namaIbu').value.trim(),
+    pendidikan_terakhir_ibu: document.getElementById('select_pendidikanIbu').value,
+    pekerjaan_ibu: document.getElementById('input_pekerjaanIbu').value.trim(),
+    tahun_lahir_ibu: document.getElementById('input_tahunIbu').value.trim(),
+    penghasilan_ibu_bulanan: document.getElementById('select_penghasilanIbu').value,
+    no_hp_ibu: document.getElementById('input_hpIbu').value.trim(),
+    ibu_kebutuhan_khusus: selectedKhususIbu,
 
-    namaWali: document.getElementById('input_nama_wali').value.trim() || '-',
-    pendidikanWali: selectPendWali.value,
-    pendidikanWaliText: selectPendWali.options[selectPendWali.selectedIndex]?.text || '-',
-    pekerjaanWali: document.getElementById('input_pekerjaan_wali').value.trim() || '-',
-    penghasilanWali: selectPenghasilanWali.value,
-    penghasilanWaliText: selectPenghasilanWali.options[selectPenghasilanWali.selectedIndex]?.text || '-',
-    hpWali: document.getElementById('input_nomor_telepon_wali').value.trim() || '-',
+    nama_wali: document.getElementById('input_nama_wali').value.trim(),
+    pendidikan_terakhir_wali: document.getElementById('pendidikan_wali').value,
+    pekerjaan_wali: document.getElementById('input_pekerjaan_wali').value.trim(),
+    penghasilan_wali_bulanan: document.getElementById('penghasilan_wali_select').value,
+    no_hp_wali: document.getElementById('input_nomor_telepon_wali').value.trim(),
 
-    provinsi: selectProv.value,
-    provinsiText: selectProv.options[selectProv.selectedIndex]?.text || '-',
-    kabupaten: selectKab.value,
-    kabupatenText: selectKab.options[selectKab.selectedIndex]?.text || '-',
-    kecamatan: selectKec.value,
-    kecamatanText: selectKec.options[selectKec.selectedIndex]?.text || '-',
-    kelurahan: selectKel.value,
-    kelurahanText: selectKel.options[selectKel.selectedIndex]?.text || '-',
-    alamatLengkap: document.getElementById('input_alamatLengkap').value.trim(),
+    provinsi: namaProvinsi,
+    kabupaten: namaKabupaten,
+    kecamatan: namaKecamatan,
+    desa: namaDesa,
+    alamat_lengkap: document.getElementById('input_alamatLengkap').value.trim(),
     rt: document.getElementById('input_rt').value.trim(),
     rw: document.getElementById('input_rw').value.trim(),
-    jenisTinggal: document.getElementById('select_jenisTinggal').value,
-    transportasi: document.getElementById('input_transportasi').value.trim(),
-    kodePos: document.getElementById('input_kodePos').value.trim(),
-    jarakSekolah: document.getElementById('input_jarakSekolah').value.trim(),
+    jenis_tinggal: document.getElementById('select_jenisTinggal').value,
+    alat_transportasi_ke_sekolah: document.getElementById('input_transportasi').value.trim(),
+    kode_pos: document.getElementById('input_kodePos').value.trim(),
+    jarak_ke_sekolah: document.getElementById('input_jarakSekolah').value.trim(),
 
-    jurusan1: selectedJ1,
-    jurusan2: selectedJ2,
-    gelombang: document.getElementById('gelombang_pendaftaran').value,
-    metodePembayaran: document.getElementById('metode_pembayaran').value || 'gratis'
+    jurusan_pilihan_1: selectedJ1,
+    jurusan_pilihan_2: selectedJ2,
   };
 
-  localStorage.setItem('data_pendaftaran', JSON.stringify(updatedData));
+  const btnSimpan = document.getElementById('btnSimpan');
+  btnSimpan.disabled = true;
+  const teksAsli = btnSimpan.innerHTML;
+  btnSimpan.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
 
-  showToast("Perubahan berhasil disimpan.");
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const res = await fetch("{{ url('/edit_data_siswa/update') }}", {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
 
-  setTimeout(() => {
-    window.location.href = "{{ url('/biodata_siswa') }}";
-  }, 1200);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const pesanError = err.errors ? Object.values(err.errors).flat().join(' ') : (err.message || 'Gagal menyimpan.');
+      throw new Error(pesanError);
+    }
+
+    showToast("Perubahan berhasil disimpan.");
+    setTimeout(() => {
+      window.location.href = "{{ url('/biodata_siswa') }}";
+    }, 1200);
+
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || 'Gagal menyimpan perubahan. Coba lagi.', true);
+    btnSimpan.disabled = false;
+    btnSimpan.innerHTML = teksAsli;
+  }
 });
 
 function hubungiAdminWA() {
@@ -1609,7 +1557,7 @@ function hubungiAdminWA() {
 
 function logoutSystem() {
   if (confirm("Apakah Anda yakin ingin keluar dari sistem?")) {
-    window.location.href = "{{ url('/log-in') }}";
+    window.location.href = "{{ url('/login') }}";
   }
 }
 </script>

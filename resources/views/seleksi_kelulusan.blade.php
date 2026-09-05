@@ -1164,7 +1164,7 @@
                     <td>
                         <select class="status-select" onchange="updateStatusSeleksi(${s.originalIndex}, this.value)">
                             <option value="Belum Diproses" ${statusSeleksi === 'Belum Diproses' ? 'selected' : ''}>Belum Diproses</option>
-                            <option value="Lulus" ${statusSeleksi === 'Lulus' ? 'selected' : ''}>Lulus</option>
+                            <option value="Lulus" ${statusSeleksi === 'Lulus' ? 'selected' : ''} ${s.statusVerifikasi !== 'lengkap' ? 'disabled' : ''}>Lulus${s.statusVerifikasi !== 'lengkap' ? ' (berkas belum lengkap)' : ''}</option>
                             <option value="Tidak Lulus" ${statusSeleksi === 'Tidak Lulus' ? 'selected' : ''}>Tidak Lulus</option>
                             <option value="Cadangan" ${statusSeleksi === 'Cadangan' ? 'selected' : ''}>Cadangan</option>
                         </select>
@@ -1196,6 +1196,15 @@
 
         function updateStatusSeleksi(index, newStatus) {
             const siswa = seleksiData[index];
+            const statusSebelumnya = siswa.statusSeleksi;
+
+            // Cegah admin nge-set "Lulus" kalau berkas siswa belum lengkap/terverifikasi
+            if (newStatus === 'Lulus' && siswa.statusVerifikasi !== 'lengkap') {
+                alert(`${siswa.nama} belum bisa diluluskan karena berkas pendaftarannya belum lengkap/terverifikasi. Silakan verifikasi berkasnya dulu di menu Verifikasi Berkas.`);
+                renderSeleksiTable(); // render ulang biar dropdown balik ke status sebelumnya
+                return;
+            }
+
             siswa.statusSeleksi = newStatus;
 
             simpanSeleksiKeServer(siswa.id, newStatus, siswa.nilaiAkhir)
@@ -1204,6 +1213,8 @@
                     renderSeleksiTable();
                 })
                 .catch(() => {
+                    siswa.statusSeleksi = statusSebelumnya;
+                    renderSeleksiTable();
                     alert('Gagal menyimpan status seleksi ke server. Coba lagi.');
                 });
         }
@@ -1238,18 +1249,32 @@
             const pilihanStatus = prompt("Masukkan status kelulusan untuk siswa yang dipilih:\n(Ketik: Lulus / Tidak Lulus / Cadangan / Belum Diproses)", "Lulus");
 
             if (pilihanStatus && ["Lulus", "Tidak Lulus", "Cadangan", "Belum Diproses"].includes(pilihanStatus)) {
-                const permintaan = Array.from(checkedBoxes).map(cb => {
+                const siswaDiblokir = [];
+                const permintaan = [];
+
+                Array.from(checkedBoxes).forEach(cb => {
                     const idx = cb.getAttribute('data-index');
                     const siswa = seleksiData[idx];
+
+                    // Skip siswa yang berkasnya belum lengkap kalau mau diluluskan
+                    if (pilihanStatus === 'Lulus' && siswa.statusVerifikasi !== 'lengkap') {
+                        siswaDiblokir.push(siswa.nama);
+                        return;
+                    }
+
                     siswa.statusSeleksi = pilihanStatus;
-                    return simpanSeleksiKeServer(siswa.id, pilihanStatus, siswa.nilaiAkhir);
+                    permintaan.push(simpanSeleksiKeServer(siswa.id, pilihanStatus, siswa.nilaiAkhir));
                 });
 
                 Promise.all(permintaan)
                     .then(() => {
                         renderStats();
                         renderSeleksiTable();
-                        alert(`Status ${checkedBoxes.length} siswa berhasil diperbarui menjadi "${pilihanStatus}".`);
+                        let pesan = `Status ${permintaan.length} siswa berhasil diperbarui menjadi "${pilihanStatus}".`;
+                        if (siswaDiblokir.length > 0) {
+                            pesan += `\n\nDilewati (berkas belum lengkap/terverifikasi): ${siswaDiblokir.join(', ')}`;
+                        }
+                        alert(pesan);
                     })
                     .catch(() => {
                         alert('Sebagian atau semua data gagal disimpan ke server. Coba lagi.');

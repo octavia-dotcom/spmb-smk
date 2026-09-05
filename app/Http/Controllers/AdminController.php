@@ -109,6 +109,14 @@ class AdminController extends Controller
             'status_seleksi' => ['required', Rule::in(['Lulus', 'Tidak Lulus', 'Cadangan', 'Belum Diproses'])],
         ]);
 
+        // Nggak boleh diluluskan kalau berkas pendaftarannya belum lengkap/terverifikasi.
+        // status_verifikasi === 'lengkap' artinya semua dokumen sudah dicek admin dan disetujui.
+        if ($validated['status_seleksi'] === 'Lulus' && $pendaftar->status_verifikasi !== 'lengkap') {
+            return response()->json([
+                'message' => 'Siswa ini belum bisa diluluskan karena berkas pendaftarannya belum lengkap/terverifikasi. Silakan verifikasi berkasnya dulu di menu Verifikasi Berkas.'
+            ], 422);
+        }
+
         $pendaftar->update($validated);
 
         return response()->json(['message' => 'Status seleksi berhasil diupdate', 'data' => $pendaftar]);

@@ -787,10 +787,10 @@
                         <div class="step-date" id="dateStep3">{{ optional($pendaftar?->dokumenPendaftar)->created_at?->format('d M Y') ?? 'Belum' }}</div>
                     </div>
 
-                    <div class="step-item {{ optional($pendaftar)->status_verifikasi == 'Diverifikasi' || optional($pendaftar)->status_pendaftaran == 'Lulus' ? 'completed' : '' }}" id="step4">
+                    <div class="step-item {{ optional($pendaftar)->status_verifikasi == 'lengkap' || optional($pendaftar)->status_pendaftaran == 'Lulus' ? 'completed' : '' }}" id="step4">
                         <div class="step-icon">4</div>
                         <div class="step-label">4. Verifikasi Admin</div>
-                        <div class="step-date" id="dateStep4">{{ optional($pendaftar)->status_verifikasi ?? 'Proses...' }}</div>
+                        <div class="step-date" id="dateStep4">{{ optional($pendaftar)->status_verifikasi == 'lengkap' ? 'Terverifikasi' : (optional($pendaftar)->status_verifikasi ?? 'Proses...') }}</div>
                     </div>
 
                     <div class="step-item {{ optional($pendaftar)->status_pendaftaran == 'Lulus' ? 'completed' : '' }}" id="step5">
@@ -895,24 +895,19 @@
 
     <!-- SCRIPT GABUNGAN UNTUK SINKRONISASI DATA LOG IN, LOCALSTORAGE & DINAMIK PROGRES -->
     <script>
-        /* 0. AMBIL STATUS KELULUSAN DARI HALAMAN ADMIN "SELEKSI & KELULUSAN" (list_pendaftar) */
+        /* STATUS ASLI DARI SERVER (DATABASE) — INI YANG DIPAKAI SEBAGAI SUMBER KEBENARAN,
+           BUKAN localStorage "status_verifikasi_admin" (itu peninggalan versi dummy lama
+           sebelum backend asli terpasang, dan tidak pernah diisi oleh halaman admin yang sekarang). */
+        const STATUS_VERIFIKASI_SERVER = "{{ optional($pendaftar)->status_verifikasi ?? 'menunggu' }}";
+        const STATUS_PENDAFTARAN_SERVER = "{{ optional($pendaftar)->status_pendaftaran ?? '' }}";
+
+        /* 0. STATUS KELULUSAN — SEKARANG DIAMBIL LANGSUNG DARI DATABASE (STATUS_PENDAFTARAN_SERVER),
+           BUKAN DARI localStorage "list_pendaftar" LAGI. localStorage itu peninggalan versi dummy lama:
+           halaman admin "Seleksi & Kelulusan" yang sekarang sudah menyimpan ke database asli lewat
+           AJAX/fetch, jadi tidak pernah mengisi localStorage tsb — akibatnya status di sini selalu
+           kebaca "Belum Diproses" padahal di database sudah "Lulus". */
         function getStatusSeleksiSiswa(noPendaftaran, nama) {
-            try {
-                const listPendaftar = JSON.parse(localStorage.getItem("list_pendaftar") || "[]");
-                if (!Array.isArray(listPendaftar) || listPendaftar.length === 0) return "Belum Diproses";
-
-                // Cocokkan dulu berdasarkan No. Pendaftaran (paling akurat)
-                let match = listPendaftar.find(item => (item.noReg || item.noPendaftaran) === noPendaftaran);
-
-                // Kalau tidak ketemu, cocokkan berdasarkan nama (case-insensitive)
-                if (!match && nama) {
-                    match = listPendaftar.find(item => item.nama && item.nama.toLowerCase() === nama.toLowerCase());
-                }
-
-                return match ? (match.statusSeleksi || "Belum Diproses") : "Belum Diproses";
-            } catch (e) {
-                return "Belum Diproses";
-            }
+            return STATUS_PENDAFTARAN_SERVER || "Belum Diproses";
         }
 
         /* 1. SINKRONISASI DATA PROFILE & PROGRES PENDAFTARAN */
@@ -934,9 +929,18 @@
             const berkasSiswa = localStorage.getItem("berkas_pendaftaran") || localStorage.getItem("berkas_pendaftar_current");
             const pasFoto = localStorage.getItem("pas_foto_siswa");
 
-            // MEMBACA STATUS LENGKAP ADMIN / BERKAS
-            const currentBerkas = JSON.parse(localStorage.getItem("berkas_pendaftar_current") || "{}");
-            const globalStatus = currentBerkas._statusGlobal || localStorage.getItem("status_verifikasi_admin") || "process";
+            // MEMBACA STATUS VERIFIKASI ADMIN — SEKARANG DIAMBIL DARI DATABASE ASLI (STATUS_VERIFIKASI_SERVER),
+            // BUKAN DARI localStorage LAGI. Mapping nilai kolom pendaftar.status_verifikasi:
+            // 'lengkap' => sudah diverifikasi, 'revisi' => perlu revisi, 'kurang' => dokumen kurang/pending,
+            // 'ditolak' => ditolak, 'menunggu' => masih diproses (default).
+            const MAP_STATUS_SERVER = {
+                'lengkap': 'verified',
+                'revisi': 'revisi',
+                'kurang': 'pending',
+                'ditolak': 'ditolak',
+                'menunggu': 'process',
+            };
+            const globalStatus = MAP_STATUS_SERVER[STATUS_VERIFIKASI_SERVER] || 'process';
 
             let nama = "Calon Siswa 1";
             let nisn = "0081234567";
@@ -1120,6 +1124,23 @@
                 }
 
                 // Nama sudah benar dari server (Blade), tidak perlu ditimpa JS lagi
+                if (elWelcomeSubtext) elWelcomeSubtext.classList.remove('show');
+
+                elStep5.className = 'step-item';
+                elStep5.querySelector('.step-icon').innerText = '5';
+                if (dateStep5) dateStep5.innerText = "-";
+            } else if (globalStatus === "ditolak") {
+                elStep4.className = 'step-item completed';
+                elStep4.querySelector('.step-icon').innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+                if (dateStep4) dateStep4.innerText = "Ditolak";
+                completedSteps++;
+
+                if (elStatusBadge) {
+                    elStatusBadge.style.backgroundColor = '#fef2f2';
+                    elStatusBadge.style.color = '#991b1b';
+                    elStatusBadge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Berkas Ditolak';
+                }
+
                 if (elWelcomeSubtext) elWelcomeSubtext.classList.remove('show');
 
                 elStep5.className = 'step-item';

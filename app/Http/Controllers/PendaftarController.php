@@ -53,6 +53,7 @@ class PendaftarController extends Controller
         'alat_transportasi_ke_sekolah' => 'nullable|string|max:50',
         'jarak_ke_sekolah' => 'nullable|string|max:50',
         'gelombang' => 'required|string',
+        'nilai_rata_raport' => 'required|string',
         'metode_pembayaran' => 'nullable|string',
         
         // DATA AYAH
@@ -157,18 +158,68 @@ public function cetakKartu()
 public function berkasPendaftaran()
 {
     $user = auth()->user();
-    $pendaftar = \App\Models\Pendaftar::with(['dokumen', 'jurusanPilihan1'])
+    $pendaftar = \App\Models\Pendaftar::with(['dokumen', 'jurusanPilihan1', 'verifikasi'])
                  ->where('id_user', $user->id_user)
                  ->first();
 
-    return view('berkas_pendaftaran', compact('pendaftar'));
+    $dokumen = $pendaftar->dokumen ?? null;
+    $verif = $pendaftar->verifikasi ?? null;
+    $baseUrl = url('storage');
+    $catatanRevisi = $verif->catatan_revisi ?? $pendaftar->catatan_revisi ?? null;
+
+    // Mapping: key dipakai di JS (sesuai getDynamicBerkasList) => [kolom di tabel dokumen, kolom cek_ di tabel verifikasi]
+    $mapDokumen = [
+        'kk'        => ['kk', 'cek_kk'],
+        'akta'      => ['akta', 'cek_akte'],
+        'ktp-ayah'  => ['ktp_ayah', 'cek_ktp_ayah'],
+        'ktp-ibu'   => ['ktp_ibu', 'cek_ktp_ibu'],
+        'foto'      => ['pas_foto', 'cek_pas_foto'],
+        'skl'       => ['skl', 'cek_skl'],
+        'kps'       => ['kip', 'cek_kip'],
+        'pembayaran'=> ['bukti_pembayaran', 'cek_bukti_pembayaran'],
+    ];
+
+    $statusGlobal = $verif->status_verifikasi ?? $pendaftar->status_verifikasi ?? 'menunggu';
+
+    $dokumenView = [];
+    foreach ($mapDokumen as $jsKey => [$kolomDokumen, $kolomCek]) {
+        $path = $dokumen->$kolomDokumen ?? null;
+        $sudahDicek = $verif->$kolomCek ?? false;
+
+        if (!$path) {
+            $status = 'belum';
+        } elseif ($sudahDicek) {
+            $status = 'terverifikasi';
+        } elseif ($statusGlobal === 'revisi') {
+            $status = 'revisi';
+        } else {
+            $status = 'menunggu';
+        }
+
+        $dokumenView[$jsKey] = [
+            'url' => $path ? $baseUrl . '/' . $path : null,
+            'status' => $status,
+        ];
+    }
+
+    $tanggalUploadDokumen = $dokumen && $dokumen->updated_at
+        ? $dokumen->updated_at->translatedFormat('d M Y') . ' WIB'
+        : null;
+
+    // Bukti Transfer Pembayaran cuma relevan buat Gelombang 2 DAN metode bayarnya "transfer".
+    // Kalau bayar cash langsung di sekolah (metode_pembayaran = 'langsung'), nggak perlu upload apa-apa.
+    $tampilkanBuktiTransfer = str_contains((string) ($pendaftar->gelombang ?? ''), '2')
+        && $pendaftar->metode_pembayaran === 'transfer';
+
+    return view('berkas_pendaftaran', compact('pendaftar', 'dokumenView', 'catatanRevisi', 'tanggalUploadDokumen', 'tampilkanBuktiTransfer'));
 }
 // Menampilkan halaman form edit biodata
 public function edit()
 {
     $user = auth()->user();
-    $pendaftar = \App\Models\Pendaftar::where('id_user', $user->id_user)->first();
-    
+    $pendaftar = \App\Models\Pendaftar::with(['dataOrangTua', 'dokumen'])
+                 ->where('id_user', $user->id_user)->first();
+
     // Ambil data jurusan juga kalau dibutuhkan di select option form
     $jurusan = \App\Models\Jurusan::all();
 
@@ -188,7 +239,7 @@ public function update(Request $request)
         'nisn' => [
             'required',
             'max:20',
-            Rule::unique('pendaftar', 'nisn')->ignore($pendaftar->id),
+            Rule::unique('pendaftar', 'nisn')->ignore($pendaftar->id_pendaftar, 'id_pendaftar'),
         ],
         'tempat_lahir' => 'required|max:50',
         'tanggal_lahir' => 'required|date',
@@ -210,14 +261,15 @@ public function update(Request $request)
         'jurusan_pilihan_2'   => 'required|string|different:jurusan_pilihan_1',
         'kebutuhan_khusus'    => 'required|string',
         'jenis_tinggal'       => 'nullable|string',
-        'is_penerima_bantuan' => 'required|string',
+        'is_penerima_bantuan' => 'required|in:ya,tidak',
+        'jenis_bantuan'       => 'nullable|array',
         'agama' => 'nullable|string|max:50',
         'alat_transportasi_ke_sekolah' => 'nullable|string|max:50',
         'jarak_ke_sekolah' => 'nullable|string|max:50',
         
         // DATA AYAH
         'nama_ayah' => 'nullable|string|max:100',
-        'ayah_kebutuhan_khusus' => 'nullable|in:Ya,Tidak',
+        'ayah_kebutuhan_khusus' => 'nullable|in:ya,tidak',
         'pekerjaan_ayah' => 'nullable|string|max:50',
         'pendidikan_terakhir_ayah' => 'nullable|string|max:30',
         'penghasilan_ayah_bulanan' => 'nullable|string|max:30',
@@ -226,7 +278,7 @@ public function update(Request $request)
         
         // DATA IBU
         'nama_ibu' => 'nullable|string|max:100',
-        'ibu_kebutuhan_khusus' => 'nullable|in:Ya,Tidak',
+        'ibu_kebutuhan_khusus' => 'nullable|in:ya,tidak',
         'pekerjaan_ibu' => 'nullable|string|max:50',
         'pendidikan_terakhir_ibu' => 'nullable|string|max:30',
         'penghasilan_ibu_bulanan' => 'nullable|string|max:30',
@@ -241,8 +293,48 @@ public function update(Request $request)
         'no_hp_wali' => 'nullable|string|max:30',
     ]);
 
-    // 2. Langsung update ke database SEKALI JALAN!
-    $pendaftar->update($validatedData);
+    // 2. Pisahkan data ortu/wali (masuk tabel data_orang_tua, BUKAN tabel pendaftar)
+    $kolomOrtu = [
+        'nama_ayah', 'ayah_kebutuhan_khusus', 'pekerjaan_ayah', 'pendidikan_terakhir_ayah', 'penghasilan_ayah_bulanan', 'no_hp_ayah', 'tahun_lahir_ayah',
+        'nama_ibu', 'ibu_kebutuhan_khusus', 'pekerjaan_ibu', 'pendidikan_terakhir_ibu', 'penghasilan_ibu_bulanan', 'no_hp_ibu', 'tahun_lahir_ibu',
+        'nama_wali', 'pekerjaan_wali', 'penghasilan_wali_bulanan', 'pendidikan_terakhir_wali', 'no_hp_wali',
+    ];
+    $dataOrtu = Arr::only($validatedData, $kolomOrtu);
+
+    // 3. Pisahkan status penerima bantuan (masuk tabel dokumen, BUKAN tabel pendaftar)
+    $isPenerimaBantuan = ($validatedData['is_penerima_bantuan'] ?? 'tidak') === 'ya' ? 'Ya' : 'Tidak';
+    $jenisBantuan = $validatedData['jenis_bantuan'] ?? [];
+
+    // 4. Sisanya (data siswa) yang masuk ke tabel pendaftar
+    $dataSiswa = Arr::except($validatedData, array_merge($kolomOrtu, ['is_penerima_bantuan', 'jenis_bantuan']));
+
+    // 5. Update ke tabel pendaftar
+    $pendaftar->update($dataSiswa);
+
+    // 6. Update/buat data orang tua & wali
+    \App\Models\DataOrangTua::updateOrCreate(
+        ['id_pendaftar' => $pendaftar->id_pendaftar],
+        $dataOrtu
+    );
+
+    // 7. Sinkronkan status penerima bantuan ke tabel dokumen
+    $dokumen = \App\Models\DokumenPendaftar::firstOrNew(['id_pendaftar' => $pendaftar->id_pendaftar]);
+    if (!$dokumen->exists) {
+        $dokumen->id_pendaftar = $pendaftar->id_pendaftar;
+        $dokumen->created_at = now();
+    }
+    $dokumen->is_penerima_bantuan = $isPenerimaBantuan;
+    if ($isPenerimaBantuan === 'Ya') {
+        $dokumen->jenis_bantuan = json_encode($jenisBantuan);
+    } else {
+        $dokumen->jenis_bantuan = null;
+    }
+    $dokumen->updated_at = now();
+    $dokumen->save();
+
+    if ($request->wantsJson()) {
+        return response()->json(['message' => 'Biodata berhasil diperbarui!']);
+    }
 
     return redirect()->back()->with('success', 'Biodata berhasil diperbarui!');
 }
@@ -336,12 +428,20 @@ public function update(Request $request)
         'dicentang_admin' => $verif->cek_bukti_pembayaran ?? false
     ];
 
+    // Relevansi dokumen KIP/KKS/PKH dan Bukti Transfer: sama persis logikanya
+    // dengan yang dipakai di halaman siswa (berkasPendaftaran()).
+    $isPenerimaBantuan = ($dokumen->is_penerima_bantuan ?? 'Tidak') === 'Ya';
+    $tampilkanBuktiTransfer = str_contains((string) ($pendaftar->gelombang ?? ''), '2')
+        && $pendaftar->metode_pembayaran === 'transfer';
+
     return response()->json([
         'id_pendaftar' => $pendaftar->id_pendaftar,
         'nama_lengkap' => $pendaftar->nama_lengkap,
         'status_verifikasi' => $verif->status_verifikasi ?? 'menunggu',
         'tanggal_verifikasi' => $verif->tanggal_verifikasi ?? null,
-        'dokumen' => $dokumenData
+        'dokumen' => $dokumenData,
+        'is_penerima_bantuan' => $isPenerimaBantuan,
+        'tampilkan_bukti_transfer' => $tampilkanBuktiTransfer,
     ], 200);
 }
 public function verifikasiUpdate(Request $request, $id)

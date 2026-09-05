@@ -738,16 +738,16 @@
                     </div>
 
                     <div class="form-section-title" style="grid-column: span 2; margin-top: 25px; margin-bottom: 5px;">Data Orang Tua</div>
-                    <span class="parent-subtitle-only">Data Ayah</span>
+                    <span class="parent-subtitle-only">Data Ayah*</span>
 
                     <div class="form-group">
                         <label>Nama Ayah</label>
-                        <input type="text" id="input_nama_ayah" name="nama_ayah" value="{{ old('nama_ayah') }}">
+                        <input type="text" id="input_nama_ayah" name="nama_ayah" value="{{ old('nama_ayah') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Pendidikan Terakhir</label>
-                        <select id="pendidikan_ayah" name="pendidikan_terakhir_ayah" class="form-control">
+                        <select id="pendidikan_ayah" name="pendidikan_terakhir_ayah" class="form-control" required>
                             <option value="" disabled selected>Pilih Pendidikan Terakhir</option>
                             <option value="tidak_sekolah" {{ old('pendidikan_terakhir_ayah') == 'tidak_sekolah' ? 'selected' : '' }}>Tidak Sekolah</option>
                             <option value="sd" {{ old('pendidikan_terakhir_ayah') == 'sd' ? 'selected' : '' }}>SD / MI / Sederajat</option> 
@@ -761,54 +761,54 @@
 
                     <div class="form-group">
                         <label>Pekerjaan Ayah</label>
-                        <input type="text" id="input_pekerjaan_ayah" name="pekerjaan_ayah" value="{{ old('pekerjaan_ayah') }}">
+                        <input type="text" id="input_pekerjaan_ayah" name="pekerjaan_ayah" value="{{ old('pekerjaan_ayah') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Tahun Lahir</label>
-                        <input type="text" id="input_tahun_lahir_ayah" name="tahun_lahir_ayah" value="{{ old('tahun_lahir_ayah') }}">
+                        <input type="text" id="input_tahun_lahir_ayah" name="tahun_lahir_ayah" value="{{ old('tahun_lahir_ayah') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Penghasilan Bulanan</label>
-                        <select id="penghasilan_ayah_select" name="penghasilan_ayah_bulanan" class="form-control">
+                        <select id="penghasilan_ayah_select" name="penghasilan_ayah_bulanan" class="form-control" required>
                             <option value="" disabled selected>Pilih Penghasilan Bulanan</option>
-                            <option value="tidak_berpenghasilan" {{ old('penghasilan_ayah_bulanan') == 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
-                            <option value="kurang_1jt" {{ old('penghasilan_ayah_bulanan') == 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
-                            <option value="1jt_2jt" {{ old('penghasilan_ayah_bulanan') == '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
-                            <option value="2jt_5jt" {{ old('penghasilan_ayah_bulanan') == '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
-                            <option value="5jt_20jt" {{ old('penghasilan_ayah_bulanan') == '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
-                            <option value="lebih_20jt" {{ old('penghasilan_ayah_bulanan') == 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
+                            <option value="tidak_berpenghasilan" {{ old('penghasilan_bulanan_ayah') == 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
+                            <option value="kurang_1jt" {{ old('penghasilan_bulanan_ayah') == 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
+                            <option value="1jt_2jt" {{ old('penghasilan_bulanan_ayah') == '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
+                            <option value="2jt_5jt" {{ old('penghasilan_bulanan_ayah') == '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
+                            <option value="5jt_20jt" {{ old('penghasilan_bulanan_ayah') == '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
+                            <option value="lebih_20jt" {{ old('penghasilan_bulanan_ayah') == 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Nomor Telepon Ayah</label>
-                        <input type="text" id="input_nomor_telepon_ayah" name="no_hp_ayah" value="{{ old('no_hp_ayah') }}">
+                        <input type="text" id="input_nomor_telepon_ayah" name="no_hp_ayah" value="{{ old('no_hp_ayah') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Memiliki Kebutuhan Khusus?</label>
                         <div class="radio-group-container">
                             <label class="selection-option">
-                                <input type="radio" name="ayah_kebutuhan_khusus" value="ya" {{ old('ayah_kebutuhan_khusus') == 'ya' ? 'checked' : '' }}> Ya
+                                <input type="radio" name="ayah_kebutuhan_khusus" value="ya" {{ old('ayah_kebutuhan_khusus') == 'ya' ? 'checked' : '' }} required> Ya
                             </label>
                             <label class="selection-option">
-                                <input type="radio" name="ayah_kebutuhan_khusus" value="tidak" {{ old('ayah_kebutuhan_khusus') == 'tidak' ? 'checked' : '' }}> Tidak
+                                <input type="radio" name="ayah_kebutuhan_khusus" value="tidak" {{ old('ayah_kebutuhan_khusus') == 'tidak' ? 'checked' : '' }} required> Tidak
                             </label>
                         </div>
                     </div>
 
-                    <div class="divider-data-ibu">Data Ibu</div>
+                    <div class="divider-data-ibu">Data Ibu*</div>
 
                     <div class="form-group">
                         <label>Nama Ibu</label>
-                        <input type="text" id="input_nama_ibu" name="nama_ibu" value="{{ old('nama_ibu') }}">
+                        <input type="text" id="input_nama_ibu" name="nama_ibu" value="{{ old('nama_ibu') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Pendidikan Terakhir</label>
-                        <select id="pendidikan_ibu" name="pendidikan_terakhir_ibu" class="form-control">
+                        <select id="pendidikan_ibu" name="pendidikan_terakhir_ibu" class="form-control" required>
                             <option value="" disabled selected>Pilih Pendidikan Terakhir</option>
                             <option value="tidak_sekolah" {{ old('pendidikan_terakhir_ibu') == 'tidak_sekolah' ? 'selected' : '' }}>Tidak Sekolah</option>
                             <option value="sd" {{ old('pendidikan_terakhir_ibu') == 'sd' ? 'selected' : '' }}>SD / MI / Sederajat</option> 
@@ -822,40 +822,40 @@
 
                     <div class="form-group">
                         <label>Pekerjaan Ibu</label>
-                        <input type="text" id="input_pekerjaan_ibu" name="pekerjaan_ibu" value="{{ old('pekerjaan_ibu') }}">
+                        <input type="text" id="input_pekerjaan_ibu" name="pekerjaan_ibu" value="{{ old('pekerjaan_ibu') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Tahun Lahir</label>
-                        <input type="text" id="input_tahun_lahir_ibu" name="tahun_lahir_ibu" value="{{ old('tahun_lahir_ibu') }}">
+                        <input type="text" id="input_tahun_lahir_ibu" name="tahun_lahir_ibu" value="{{ old('tahun_lahir_ibu') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Penghasilan Bulanan</label>
-                        <select id="penghasilan_ibu_select" name="penghasilan_ibu_bulanan" class="form-control">
+                        <select id="penghasilan_ibu_select" name="penghasilan_ibu_bulanan" class="form-control" required>
                             <option value="" disabled selected>Pilih Penghasilan Bulanan</option>
-                            <option value="tidak_berpenghasilan" {{ old('penghasilan_ibu_bulanan') == 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
-                            <option value="kurang_1jt" {{ old('penghasilan_ibu_bulanan') == 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
-                            <option value="1jt_2jt" {{ old('penghasilan_ibu_bulanan') == '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
-                            <option value="2jt_5jt" {{ old('penghasilan_ibu_bulanan') == '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
-                            <option value="5jt_20jt" {{ old('penghasilan_ibu_bulanan') == '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
-                            <option value="lebih_20jt" {{ old('penghasilan_ibu_bulanan') == 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
+                            <option value="tidak_berpenghasilan" {{ old('penghasilan_bulanan_ibu') == 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
+                            <option value="kurang_1jt" {{ old('penghasilan_bulanan_ibu') == 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
+                            <option value="1jt_2jt" {{ old('penghasilan_bulanan_ibu') == '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
+                            <option value="2jt_5jt" {{ old('penghasilan_bulanan_ibu') == '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
+                            <option value="5jt_20jt" {{ old('penghasilan_bulanan_ibu') == '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
+                            <option value="lebih_20jt" {{ old('penghasilan_bulanan_ibu') == 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Nomor Telepon Ibu</label>
-                        <input type="text" id="input_nomor_telepon_ibu" name="no_hp_ibu" value="{{ old('no_hp_ibu') }}">
+                        <input type="text" id="input_nomor_telepon_ibu" name="no_hp_ibu" value="{{ old('no_hp_ibu') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label>Memiliki Kebutuhan Khusus? </label>
                         <div class="radio-group-container">
                             <label class="selection-option">
-                                <input type="radio" name="ibu_kebutuhan_khusus" value="ya" {{ old('ibu_kebutuhan_khusus') == 'ya' ? 'checked' : '' }}> Ya
+                                <input type="radio" name="ibu_kebutuhan_khusus" value="ya" {{ old('ibu_kebutuhan_khusus') == 'ya' ? 'checked' : '' }} required> Ya
                             </label>
                             <label class="selection-option">
-                                <input type="radio" name="ibu_kebutuhan_khusus" value="tidak" {{ old('ibu_kebutuhan_khusus') == 'tidak' ? 'checked' : '' }}> Tidak
+                                <input type="radio" name="ibu_kebutuhan_khusus" value="tidak" {{ old('ibu_kebutuhan_khusus') == 'tidak' ? 'checked' : '' }} required> Tidak
                             </label>
                         </div>
                     </div>
@@ -890,12 +890,12 @@
                         <label>Penghasilan Bulanan</label>
                         <select id="penghasilan_wali_select" name="penghasilan_wali_bulanan" class="form-control">
                             <option value="" disabled selected>Pilih Penghasilan Bulanan</option>
-                            <option value="tidak_berpenghasilan" {{ old('penghasilan_wali_bulanan') == 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
-                            <option value="kurang_1jt" {{ old('penghasilan_wali_bulanan') == 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
-                            <option value="1jt_2jt" {{ old('penghasilan_wali_bulanan') == '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
-                            <option value="2jt_5jt" {{ old('penghasilan_wali_bulanan') == '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
-                            <option value="5jt_20jt" {{ old('penghasilan_wali_bulanan') == '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
-                            <option value="lebih_20jt" {{ old('penghasilan_wali_bulanan') == 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
+                            <option value="tidak_berpenghasilan" {{ old('penghasilan_bulanan_wali') == 'tidak_berpenghasilan' ? 'selected' : '' }}>Tidak Berpenghasilan / Tidak Bekerja</option>
+                            <option value="kurang_1jt" {{ old('penghasilan_bulanan_wali') == 'kurang_1jt' ? 'selected' : '' }}>Kurang dari Rp 1.000.000</option>
+                            <option value="1jt_2jt" {{ old('penghasilan_bulanan_wali') == '1jt_2jt' ? 'selected' : '' }}>Rp 1.000.000 - Rp 1.999.999</option>
+                            <option value="2jt_5jt" {{ old('penghasilan_bulanan_wali') == '2jt_5jt' ? 'selected' : '' }}>Rp 2.000.000 - Rp 4.999.999</option>
+                            <option value="5jt_20jt" {{ old('penghasilan_bulanan_wali') == '5jt_20jt' ? 'selected' : '' }}>Rp 5.000.000 - Rp 20.000.000</option>
+                            <option value="lebih_20jt" {{ old('penghasilan_bulanan_wali') == 'lebih_20jt' ? 'selected' : '' }}>Lebih dari Rp 20.000.000</option>
                         </select>
                     </div>
 
@@ -1266,20 +1266,29 @@
             function namaTerpilih(select) {
                 if (!select || select.selectedIndex < 0) return '';
                 const opt = select.options[select.selectedIndex];
-                return opt ? opt.textContent : '';
+                // opt.value kosong berarti masih di placeholder ("Pilih Provinsi" dst),
+                // jadi dianggap belum benar-benar terpilih meskipun teksnya bukan string kosong.
+                return (opt && opt.value) ? opt.textContent : '';
             }
+
             const namaProvinsi = namaTerpilih(selectProvinsi);
             const namaKabupaten = namaTerpilih(selectKabupaten);
             const namaKecamatan = namaTerpilih(selectKecamatan);
             const namaDesa = namaTerpilih(selectKelurahan);
 
-            // Guard: kalau ada yang masih kosong (misal fetch ke API wilayah gagal
-            // atau user belum sempat memilih), tahan submit dan kasih tahu usernya
-            // daripada diam-diam kesimpan NULL ke database.
-            if (!namaProvinsi || !namaKabupaten || !namaKecamatan || !namaDesa) {
+            // PENGAMAN: kalau salah satu dropdown wilayah ternyata belum
+            // benar-benar terisi (misal karena API-nya lambat/gagal saat itu),
+            // form JANGAN sampai lolos submit dengan data wilayah kosong.
+            const belumLengkap = [];
+            if (!namaProvinsi) belumLengkap.push('Provinsi');
+            if (!namaKabupaten) belumLengkap.push('Kabupaten/Kota');
+            if (!namaKecamatan) belumLengkap.push('Kecamatan');
+            if (!namaDesa) belumLengkap.push('Desa/Kelurahan');
+
+            if (belumLengkap.length > 0) {
                 e.preventDefault();
-                alert('Data Provinsi/Kabupaten/Kecamatan/Desa belum lengkap terpilih. Silakan pilih ulang mulai dari Provinsi, dan pastikan koneksi internet stabil.');
-                return false;
+                alert('Data wilayah belum lengkap: ' + belumLengkap.join(', ') + '.\nSilakan pilih ulang dari dropdown Provinsi (tunggu sampai pilihan berikutnya termuat sebelum lanjut), baru coba simpan lagi.');
+                return;
             }
 
             document.getElementById('provinsi_nama').value = namaProvinsi;

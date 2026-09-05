@@ -15,7 +15,7 @@ class Pendaftar extends Model
     protected $fillable = [
         'id_user',
         'nama_lengkap',
-        'no_pendaftar',
+        'no_pendaftaran',
         'nisn',
         'tempat_lahir',
         'tanggal_lahir',  // BARU
@@ -29,11 +29,12 @@ class Pendaftar extends Model
         'rw', 
         'desa',
         'kecamatan',
-        'kebupaten',
+        'kabupaten',
         'provinsi',
         'kode_pos',
         'jenis_tinggal',
         'kebutuhan_khusus',
+        'is_penerima_bantuan',
         'alat_transportasi_ke_sekolah',
         'jumlah_saudara_kandung',
         'no_hp',        
@@ -45,7 +46,7 @@ class Pendaftar extends Model
         'status_pendaftaran',
         'status_verifikasi',
         'status_seleksi',
-        'niali_akhir',
+        'nilai_rata_akhir',
         'catatan_revisi'
     ]; // <-- PENUTUP $fillable SAMPE SINI
 

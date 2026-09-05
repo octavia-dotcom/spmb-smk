@@ -1052,6 +1052,7 @@
                     jurusan2: item.jurusan_pilihan_2 || '-',
                     gelombang: item.gelombang || '-',
                     status: item.status_verifikasi || 'menunggu',
+                    statusSeleksi: item.status_seleksi || 'Belum Diproses',
                     statusAdmin: item.metode_pembayaran || '-',
                     tglDaftar: item.created_at ? item.created_at.substring(0, 10) : '-'
                 };
@@ -1086,13 +1087,14 @@
 
             dataList.forEach(item => {
                 const status = (item.status || '').toLowerCase();
-                if (status.includes('diverifikasi') || status.includes('verifikasi')) {
-                    verif++;
-                } else if (status.includes('diterima') || status.includes('lulus')) {
-                    diterima++;
-                } else {
-                    proses++;
-                }
+                const statusSeleksi = (item.statusSeleksi || '').toLowerCase();
+
+                // "Terverifikasi" dan "Diterima" itu independen, bukan saling eksklusif —
+                // siswa yang sudah "Lulus" tetap ikut kehitung di "Terverifikasi" juga,
+                // karena syarat lulus memang harus lengkap dulu.
+                if (status === 'lengkap') verif++;
+                if (statusSeleksi === 'lulus') diterima++;
+                if (status !== 'lengkap' && statusSeleksi !== 'lulus') proses++;
             });
 
             document.getElementById("stat-total").innerText = total;

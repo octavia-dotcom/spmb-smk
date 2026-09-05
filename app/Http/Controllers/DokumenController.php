@@ -20,6 +20,15 @@ class DokumenController extends Controller
 
         $id_pendaftar = $pendaftar->id_pendaftar;
 
+        // Samakan dulu format "Ya"/"Tidak"-nya di sini, sebelum divalidasi/dipakai
+        // di bawah. Form pendaftaran (formulir_blade.php) kirim huruf kecil "ya"/"tidak",
+        // sementara aturan required_if & pengecekan di bawah ini pakai "Ya" (huruf besar).
+        // Tanpa ini, perbandingannya selalu gagal (case-sensitive) dan is_penerima_bantuan
+        // ke-reset jadi "Tidak" terus meskipun pendaftar sebenarnya memilih "Ya".
+        $request->merge([
+            'is_penerima_bantuan' => strtolower(trim((string) $request->input('is_penerima_bantuan'))) === 'ya' ? 'Ya' : 'Tidak',
+        ]);
+
         // 2. Validasi Input Form
         $request->validate([
             'pas_foto'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048', 
@@ -28,7 +37,7 @@ class DokumenController extends Controller
             'akta'             => 'required|mimes:pdf,jpg,jpeg,png|max:2048',
             'ktp_ayah'         => 'required|mimes:pdf,jpg,jpeg,png|max:1024',
             'ktp_ibu'         => 'required|mimes:pdf,jpg,jpeg,png|max:1024',
-            'bukti_pembayaran' => 'required_if:metode_pembayaran,tf|mimes:pdf,jpg,jpeg,png|max:2048',
+            'bukti_pembayaran' => 'required_if:metode_pembayaran,transfer|mimes:pdf,jpg,jpeg,png|max:2048',
             'berkas_bantuan'   => 'required_if:is_penerima_bantuan,Ya|mimes:pdf,jpg,jpeg,png|max:2048',
         ], [
             'bukti_pembayaran.required_if' => 'Karena Anda memilih metode Transfer, bukti pembayaran wajib diunggah!',
@@ -67,6 +76,7 @@ class DokumenController extends Controller
         $listBantuan = ['kps', 'kks', 'kip'];
 
         if ($request->is_penerima_bantuan == 'Ya') {
+            $dataToUpdate['is_penerima_bantuan'] = 'Ya';
             $jenisDipilih = $request->jenis_bantuan ?? []; // Berbentuk array, misal: ['kip']
 
             foreach ($listBantuan as $b) {
@@ -134,5 +144,61 @@ class DokumenController extends Controller
     {
         // Tampilkan view form unggah berkas
         return view('unggah_berkas'); 
+    }
+
+    // Ganti SATU dokumen aja (dipakai di halaman Berkas Pendaftaran, tombol "Ganti"/"Unggah Ulang")
+    // Beda dari store() di atas: yang ini nggak mewajibkan semua dokumen lain ikut diisi,
+    // dan hasilnya JSON (bukan redirect), karena dipanggil lewat fetch() dari JS.
+    public function updateSatuBerkas(Request $request)
+    {
+        $pendaftar = Pendaftar::where('id_user', auth()->id())->first();
+
+        if (!$pendaftar) {
+            return response()->json(['message' => 'Data pendaftaran tidak ditemukan.'], 404);
+        }
+
+        $kolomValid = ['kk', 'akta', 'ktp_ayah', 'ktp_ibu', 'skl', 'pas_foto', 'kip', 'bukti_pembayaran'];
+
+        $validated = $request->validate([
+            'jenis_dokumen' => ['required', \Illuminate\Validation\Rule::in($kolomValid)],
+            'file' => 'required|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        $kolom = $validated['jenis_dokumen'];
+
+        $dokumen = DokumenPendaftar::firstOrNew(['id_pendaftar' => $pendaftar->id_pendaftar]);
+
+        // Hapus file lama kalau ada, biar storage nggak numpuk file nggak kepake
+        if ($dokumen->$kolom) {
+            Storage::disk('public')->delete($dokumen->$kolom);
+        }
+
+        $path = $request->file('file')->store('dokumen/' . $kolom, 'public');
+
+        if (!$dokumen->exists) {
+            $dokumen->id_pendaftar = $pendaftar->id_pendaftar;
+            $dokumen->created_at = now();
+        }
+        $dokumen->$kolom = $path;
+        $dokumen->updated_at = now();
+        $dokumen->save();
+
+        // Dokumen yang baru diganti otomatis balik ke status "belum dicek" lagi,
+        // supaya admin tahu ini perlu direview ulang.
+        $kolomCekMap = [
+            'kk' => 'cek_kk', 'akta' => 'cek_akte', 'ktp_ayah' => 'cek_ktp_ayah',
+            'ktp_ibu' => 'cek_ktp_ibu', 'skl' => 'cek_skl', 'pas_foto' => 'cek_pas_foto',
+            'kip' => 'cek_kip', 'bukti_pembayaran' => 'cek_bukti_pembayaran',
+        ];
+        $kolomCek = $kolomCekMap[$kolom] ?? null;
+        if ($kolomCek) {
+            \App\Models\Verifikasi::where('id_pendaftar', $pendaftar->id_pendaftar)
+                ->update([$kolomCek => false]);
+        }
+
+        return response()->json([
+            'message' => 'Berkas berhasil diperbarui.',
+            'url' => url('storage') . '/' . $path,
+        ]);
     }
 }
